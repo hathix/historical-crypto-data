@@ -1,14 +1,14 @@
 {
   "dependencies": {
     "coingecko-api": "^1.0.10",
-    "csv": "^6.0.4"
+    "csv": "^6.0.4",
+    "lodash": "^4.17.21"
   },
   "name": "historical-crypto-data",
   "description": "Grab historical crypto pricing",
   "version": "1.0.0",
   "main": "getdata.js",
   "type": "module",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

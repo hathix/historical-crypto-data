@@ -2,6 +2,12 @@
 
 import { stringify } from 'csv-stringify';
 import { writeFile } from 'fs';
+import _ from 'lodash';
+
+
+// For writing files
+const dirname = process.cwd(); // Doesn't include the trailing slash
+
 
 // Set up the client
 import CoinGecko from 'coingecko-api';
@@ -61,11 +67,45 @@ async function getCoinList() {
 
 // Prints the historical pricing data for a given coin.
 async function getHistoricalDataFor(coinId) {
-  let data = await CoinGeckoClient.coins.fetchMarketChart(coinId, {
-    days: 365, // integer or 'max'
+  // This returns an object with { data: { prices, market_caps, total_volumes }}
+  // And each of these is an array of `days` items. Each item includes the
+  // timestamp of that day and the corresponding value.
+  let rawData = await CoinGeckoClient.coins.fetchMarketChart(coinId, {
+    days: 100, // integer or 'max'
     vs_currency: 'usd',
   });
-  console.log(data);
+  const prices = rawData.data.prices;
+  const marketCaps = rawData.data.market_caps;
+  const totalVolumes = rawData.data.total_volumes;
+
+  // Each of these has the same keys but different values. Let's zip
+  // them together.
+  const timestamps = prices.map(([timestamp, price]) => timestamp);
+  // Now extract the price, market cap, and volume at that price.
+  // Remember that each is an array of tuples where the timestamp is the
+  // 0th element and the payload is the 1st.
+  const mergedData = timestamps.map((timestamp, i) => {
+    return {
+      timestamp: timestamp,
+      readableTimestamp: new Date(timestamp).toLocaleString(
+        'en-US', { timeZone: 'UTC' }),
+      coinId: coinId,
+      price: prices[i][1],
+      marketCap: marketCaps[i][1],
+      totalVolume: totalVolumes[i][1],
+    }
+  });
+
+  console.log(mergedData);
+
+  // Write to file
+  stringify(mergedData, {
+    header: true,
+  }, (err, output) => {
+    writeFile(`${dirname}/coins/${coinId}.csv`, output, () => {
+      console.log("done");
+    });
+  });
 }
 
 getHistoricalDataFor('bitcoin');
