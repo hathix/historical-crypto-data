@@ -7,14 +7,10 @@ import { writeFile } from 'fs';
 import CoinGecko from 'coingecko-api';
 const CoinGeckoClient = new CoinGecko();
 
-async function run() {
-  // let data = await CoinGeckoClient.coins.fetchMarketChart('bitcoin', {
-  //   days: 10, // integer or 'max'
-  //   vs_currency: 'usd',
-  // });
-  // console.log(data);
-
-
+// You only need to run this once, really. Gets a huge list of
+// all the top cryptocurrencies and prints it to stdout, which you can
+// send to a CSV file.
+async function getCoinList() {
   // Get full list of coins. There are 50 per page, so grab a few.
   let data0 = await CoinGeckoClient.coins.all({
     page: 0,
@@ -58,8 +54,18 @@ async function run() {
   }, (err, output) => {
     console.log(output);
   });
-
-
 }
 
-run();
+// getCoinList();
+
+
+// Prints the historical pricing data for a given coin.
+async function getHistoricalDataFor(coinId) {
+  let data = await CoinGeckoClient.coins.fetchMarketChart(coinId, {
+    days: 365, // integer or 'max'
+    vs_currency: 'usd',
+  });
+  console.log(data);
+}
+
+getHistoricalDataFor('bitcoin');
