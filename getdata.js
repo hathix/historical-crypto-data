@@ -1,7 +1,8 @@
 // Get historical market data for a coin
 
 import { stringify } from 'csv-stringify';
-import { writeFile } from 'fs';
+import { parse } from 'csv-parse';
+import { writeFile, createReadStream } from 'fs';
 import _ from 'lodash';
 
 
@@ -82,7 +83,7 @@ async function getCoinList() {
   });
 }
 
-getCoinList();
+// getCoinList();
 
 
 // Outputs the historical pricing data for a given coin to CSV.
@@ -139,23 +140,37 @@ async function getHistoricalDataFor(coinId) {
 }
 
 // These are the coins we care about (by coin ID)...
-const coinsOfInterest = [
-  'bitcoin',
-  'ethereum',
-  'binancecoin',
-  'solana',
-  'cardano',
-  'ripple',
-  'avalanche-2',
-  'polkadot',
-  'terra-luna',
-  'dogecoin',
-  'shiba-inu',
-  'matic-network',
-  'crypto-com-chain',
-  'litecoin',
-  'chainlink',
-  'algorand',
-];
+// const coinsOfInterest = [
+//   'bitcoin',
+//   'ethereum',
+//   'binancecoin',
+//   'solana',
+//   'cardano',
+//   'ripple',
+//   'avalanche-2',
+//   'polkadot',
+//   'terra-luna',
+//   'dogecoin',
+//   'shiba-inu',
+//   'matic-network',
+//   'crypto-com-chain',
+//   'litecoin',
+//   'chainlink',
+//   'algorand',
+// ];
 
 // coinsOfInterest.forEach(coin => getHistoricalDataFor(coin));
+
+// Grab the list of all coins from the coindata file
+const parser = parse({columns: true}, function (err, records) {
+  // This is an array of coin details (with id, symbol, name)
+  // We get 50 operations per minute with the API, so about every ~2 seconds
+  // let's grab data for another coin.
+  for (let i = 0; i < records.length; i++) {
+    setTimeout((i) => {
+      console.log(`Getting data for ${records[i].name}`);
+      getHistoricalDataFor(records[i].id);
+    }, 2000 * i, i);
+  }
+});
+createReadStream(`${dirname}/coindata.csv`).pipe(parser);
