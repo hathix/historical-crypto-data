@@ -65,15 +65,25 @@ async function getCoinList() {
 // getCoinList();
 
 
-// Prints the historical pricing data for a given coin.
+// Outputs the historical pricing data for a given coin to CSV.
 async function getHistoricalDataFor(coinId) {
+
+  console.log("Getting ", coinId);
+
   // This returns an object with { data: { prices, market_caps, total_volumes }}
   // And each of these is an array of `days` items. Each item includes the
   // timestamp of that day and the corresponding value.
   let rawData = await CoinGeckoClient.coins.fetchMarketChart(coinId, {
-    days: 100, // integer or 'max'
+    days: 365, // integer or 'max'
     vs_currency: 'usd',
   });
+
+  // Sometimes the raw data won't include anything, in which case bail out
+  if (rawData.data == null || rawData.data.prices == null) {
+    console.log(`No data for ${coinId}, bailing out`);
+    return;
+  }
+
   const prices = rawData.data.prices;
   const marketCaps = rawData.data.market_caps;
   const totalVolumes = rawData.data.total_volumes;
@@ -96,7 +106,7 @@ async function getHistoricalDataFor(coinId) {
     }
   });
 
-  console.log(mergedData);
+  // console.log(mergedData);
 
   // Write to file
   stringify(mergedData, {
@@ -108,4 +118,24 @@ async function getHistoricalDataFor(coinId) {
   });
 }
 
-getHistoricalDataFor('bitcoin');
+// These are the coins we care about (by coin ID)...
+const coinsOfInterest = [
+  'bitcoin',
+  'ethereum',
+  'binancecoin',
+  'solana',
+  'cardano',
+  'ripple',
+  'avalanche-2',
+  'polkadot',
+  'terra-luna',
+  'dogecoin',
+  'shiba-inu',
+  'matic-network',
+  'crypto-com-chain',
+  'litecoin',
+  'chainlink',
+  'algorand',
+];
+
+coinsOfInterest.forEach(coin => getHistoricalDataFor(coin));
