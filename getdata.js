@@ -33,6 +33,21 @@ async function getCoinList() {
   let data4 = await CoinGeckoClient.coins.all({
     page: 4,
   });
+  let data5 = await CoinGeckoClient.coins.all({
+    page: 5,
+  });
+  let data6 = await CoinGeckoClient.coins.all({
+    page: 6,
+  });
+  let data7 = await CoinGeckoClient.coins.all({
+    page: 7,
+  });
+  let data8 = await CoinGeckoClient.coins.all({
+    page: 8,
+  });
+  let data9 = await CoinGeckoClient.coins.all({
+    page: 9,
+  });
 
   // Merge all of these pages into one big list of coin data
   const fullCoinList = [
@@ -41,6 +56,11 @@ async function getCoinList() {
     ...data2.data,
     ...data3.data,
     ...data4.data,
+    ...data5.data,
+    ...data6.data,
+    ...data7.data,
+    ...data8.data,
+    ...data9.data,
   ];
 
   // Extract just the name, id (used for the lookup), and ticker symbol
@@ -62,7 +82,7 @@ async function getCoinList() {
   });
 }
 
-// getCoinList();
+getCoinList();
 
 
 // Outputs the historical pricing data for a given coin to CSV.
@@ -138,4 +158,4 @@ const coinsOfInterest = [
   'algorand',
 ];
 
-coinsOfInterest.forEach(coin => getHistoricalDataFor(coin));
+// coinsOfInterest.forEach(coin => getHistoricalDataFor(coin));
