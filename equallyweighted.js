@@ -96,5 +96,7 @@ function extractPricesAt(timestamp) {
 
 // Jan 1
 extractPricesAt(1609459200000);
+// June 1
+extractPricesAt(1622505600000);
 // Today, 12/17/21
 extractPricesAt(1639699200000);
