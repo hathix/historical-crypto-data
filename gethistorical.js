@@ -14,77 +14,6 @@ const dirname = process.cwd(); // Doesn't include the trailing slash
 import CoinGecko from 'coingecko-api';
 const CoinGeckoClient = new CoinGecko();
 
-// You only need to run this once, really. Gets a huge list of
-// all the top cryptocurrencies and prints it to stdout, which you can
-// send to a CSV file.
-async function getCoinList() {
-  // Get full list of coins. There are 50 per page, so grab a few.
-  let data0 = await CoinGeckoClient.coins.all({
-    page: 0,
-  });
-  let data1 = await CoinGeckoClient.coins.all({
-    page: 1,
-  });
-  let data2 = await CoinGeckoClient.coins.all({
-    page: 2,
-  });
-  let data3 = await CoinGeckoClient.coins.all({
-    page: 3,
-  });
-  let data4 = await CoinGeckoClient.coins.all({
-    page: 4,
-  });
-  let data5 = await CoinGeckoClient.coins.all({
-    page: 5,
-  });
-  let data6 = await CoinGeckoClient.coins.all({
-    page: 6,
-  });
-  let data7 = await CoinGeckoClient.coins.all({
-    page: 7,
-  });
-  let data8 = await CoinGeckoClient.coins.all({
-    page: 8,
-  });
-  let data9 = await CoinGeckoClient.coins.all({
-    page: 9,
-  });
-
-  // Merge all of these pages into one big list of coin data
-  const fullCoinList = [
-    ...data0.data,
-    ...data1.data,
-    ...data2.data,
-    ...data3.data,
-    ...data4.data,
-    ...data5.data,
-    ...data6.data,
-    ...data7.data,
-    ...data8.data,
-    ...data9.data,
-  ];
-
-  // Extract just the name, id (used for the lookup), and ticker symbol
-  const shortCoinList = fullCoinList.map(d => {
-    return {
-      id: d.id,
-      symbol: d.symbol,
-      name: d.name,
-    }
-  });
-
-  // console.log(shortCoinList);
-
-  // Write to standard output; you can send it to a file
-  stringify(shortCoinList, {
-    header: true,
-  }, (err, output) => {
-    console.log(output);
-  });
-}
-
-// getCoinList();
-
 
 // Outputs the historical pricing data for a given coin to CSV.
 async function getHistoricalDataFor(coinId) {
@@ -160,7 +89,7 @@ async function getHistoricalDataFor(coinId) {
 // ];
 
 // coinsOfInterest.forEach(coin => getHistoricalDataFor(coin));
-
+//
 // Grab the list of all coins from the coindata file
 const parser = parse({columns: true}, function (err, records) {
   // This is an array of coin details (with id, symbol, name)

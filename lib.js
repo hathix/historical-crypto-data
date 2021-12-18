@@ -77,4 +77,33 @@ export function getDataForDay(historicalCoinData, timestamp) {
   })[0];
 }
 
-console.log(getDataForDay(getHistoricalData("1inch"), 1639612800000);
+/**
+  Makes a numerical timestamp (for midnight UTC) out of the given date string,
+  such as "December 1, 2021".
+*/
+export function dateToTimestamp(dateString) {
+  return +(new Date(`${dateString} UTC`));
+}
+
+// console.log(getDataForDay(getHistoricalData("1inch"), 1639612800000));
+// console.log(
+//   getDataForDay(
+//     getHistoricalData("1inch"),
+//     dateToTimestamp("December 16, 2021"),
+//   )
+// );
+
+/**
+  Asynchronously writes the given dict to a given CSV file. You do not
+  need to provide the `dirname`; we'll take care of that.
+  e.g. pass:
+    writeDictToCsv(myDict, "data/hello.csv")
+*/
+export function writeDictToCsv(dict, filename) {
+  console.log("Writing to ", filename);
+  stringify(dict, {header: true}, (err, output) => {
+    writeFile(`${dirname}/${filename}`, output, () => {
+      console.log("done " + filename);
+    });
+  });
+}
