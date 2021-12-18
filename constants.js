@@ -30,7 +30,7 @@ export const STABLECOIN_IDS = [
 /**
   The IDs of all known derivative (leveraged, etc.) coins.
 */
-export const LEVERAGED_COIN_IDS = [
+export const DERIVATIVE_IDS = [
   "interest-bearing-bitcoin",
   "eth-2x-flexible-leverage-index",
   "seth",
