@@ -107,3 +107,29 @@ export function writeDictToCsv(dict, filename) {
     });
   });
 }
+
+
+
+/**
+  Synchronously reads and returns the market cap data for the given day.
+  There's one record per crypto, each of which includes:
+
+  - timestamp: number
+  - readableTimestamp: string
+  - coinId: string
+  - price: number
+  - marketCap: number
+  - totalVolume: number
+*/
+export function getMarketDataOn(timestamp) {
+  // Read our list of all the top coins
+  const marketFile = readFileSync(`${dirname}/perday/${timestamp}.csv`);
+  const marketList = parseSync(marketFile, {
+    columns: true,
+    cast: true,
+  });
+
+  // Some of the dicts we get out might be empty (since some CSV rows are empty)
+  // so exclude those.
+  return marketList.filter(record => record.coinId.length > 0);
+}
