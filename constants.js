@@ -51,4 +51,5 @@ export const LEVERAGED_COIN_IDS = [
   "compound-basic-attention-token",
   "compound-uniswap",
   "compound-0x",
+  "defipulse-index",
 ];
