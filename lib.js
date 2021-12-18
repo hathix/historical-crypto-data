@@ -55,4 +55,26 @@ export function getHistoricalData(coinId) {
   return coinHistoryData;
 }
 
-console.log(getHistoricalData("shiba-inu"));
+// console.log(getHistoricalData("shiba-inu"));
+
+/**
+  Given historical data about a coin (from getHistoricalData())
+  and a timestamp, returns an object with market data about that coin on
+  that timestamp. Includes:
+
+  - timestamp: number
+  - readableTimestamp: string
+  - coinId: string
+  - price: number
+  - marketCap: number
+  - totalVolume: number
+
+  If nothing matches the given timestamp, returns undefined.
+*/
+export function getDataForDay(historicalCoinData, timestamp) {
+  return historicalCoinData.filter(record => {
+    return +record.timestamp === +timestamp;
+  })[0];
+}
+
+console.log(getDataForDay(getHistoricalData("1inch"), 1639612800000);
