@@ -7,11 +7,6 @@ import _ from "lodash";
 import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getMarketDataOn } from "./lib.js";
 import { STABLECOIN_IDS, DERIVATIVE_IDS } from "./constants.js";
 
-
-// Get a list of all the timestamps we've tracked. Pull up the oldest coin
-// (Bitcoin) and extract its list of timestamps.
-const timestamps = getHistoricalData("bitcoin").map(record => record.timestamp);
-
 /**
   Returns a list of data for all the "normal" (non-stable, non-derivative)
   cryptocurrencies on the given timestamp, sorted by market cap
@@ -60,10 +55,34 @@ export function calcMarketCapWeightedIndex(sortedMarketData, topN) {
   return weightedAverage / DIVISOR;
 }
 
-const marketData = calcMarketDataOn(dateToTimestamp("December 1, 2021"));
-console.log(calcMarketCapWeightedIndex(marketData, 10));
-console.log(calcMarketCapWeightedIndex(marketData, 20));
-console.log(calcMarketCapWeightedIndex(marketData, 50));
-console.log(calcMarketCapWeightedIndex(marketData, 100));
-console.log(calcMarketCapWeightedIndex(marketData, 200));
-console.log(calcMarketCapWeightedIndex(marketData, 500));
+/**
+  Computes the index for each day we've tracked.
+*/
+const generateIndexEveryDay() {
+  // Get a list of all the timestamps we've tracked. Pull up the oldest coin
+  // (Bitcoin) and extract its list of timestamps.
+  const timestamps = getHistoricalData("bitcoin").map(record => record.timestamp);
+
+  // Again ignore the final timestamp since that's an incomplete one
+  // for like some random point in the day when we actually pulled the data
+  const realTimestamps = timestamps.slice(0, -1);
+
+  // Now, for each day, we will calculate several indices (market weighted only
+  // for now).
+  const indicesPerDay = realTimestamps.map(timestamp => {
+    const marketData = calcMarketDataOn(timestamp);
+    return {
+      timestamp: timestamp,
+      readableTimestamp: new Date(timestamp).toLocaleString(
+        'en-US', { timeZone: 'UTC' }),
+      top10: calcMarketCapWeightedIndex(marketData, 10),
+      top20: calcMarketCapWeightedIndex(marketData, 20),
+      top50: calcMarketCapWeightedIndex(marketData, 50),
+      top100: calcMarketCapWeightedIndex(marketData, 100),
+      top200: calcMarketCapWeightedIndex(marketData, 200),
+      top500: calcMarketCapWeightedIndex(marketData, 500),
+    };
+  });
+
+  console.log(indicesPerDay);
+}
