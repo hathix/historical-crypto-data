@@ -52,4 +52,6 @@ export const DERIVATIVE_IDS = [
   "compound-uniswap",
   "compound-0x",
   "defipulse-index",
+  "lido-staked-sol",
+  "msol",
 ];
