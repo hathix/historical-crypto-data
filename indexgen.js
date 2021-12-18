@@ -32,7 +32,7 @@ const timestamps = getHistoricalData("bitcoin").map(record => record.timestamp);
 // The last timestamp is some random leftover timestamp from the middle of the
 // day when we pulled the data. So exclude that. We only care about the
 // full days.
-timestamps.slice(0, 20).forEach(timestamp => {
+timestamps.slice(0, -1).forEach(timestamp => {
   // Get data for this day
   const dataForDay = getAllCoinsOnDay(coinList, timestamp);
   console.log("Got data for", timestamp);
