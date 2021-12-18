@@ -43,47 +43,58 @@ const dirname = process.cwd(); // Doesn't include the trailing slash
 // createReadStream(`${dirname}/coindata.csv`).pipe(parser);
 
 
-// Jan 1, 2021
-const STARTING_TIMESTAMP = 1609459200000;
+/**
+  Extracts prices for all of the top 500 cryptocurrencies at the given
+  timestamp.
+*/
+function extractPricesAt(timestamp) {
+  // Jan 1, 2021
+  // const STARTING_TIMESTAMP = 1609459200000;
 
-// Read our list of all the top coins
-const rawCoinData = readFileSync(`${dirname}/coindata.csv`);
-const coinList = parseSync(rawCoinData, {columns: true});
-// console.log(records);
+  // Read our list of all the top coins
+  const rawCoinData = readFileSync(`${dirname}/coindata.csv`);
+  const coinList = parseSync(rawCoinData, {columns: true});
+  // console.log(records);
 
-// Now get the prices and market caps of each coin on 1/1/21
-const onThisDayDataRaw = coinList.map(coinList => {
-  // Read the CSV for that coin
-  const coinHistoryFile = readFileSync(`${dirname}/coins/${coinList.id}.csv`);
-  const coinHistoryData = parseSync(coinHistoryFile, {columns: true});
+  // Now get the prices and market caps of each coin on 1/1/21
+  const onThisDayDataRaw = coinList.map(coinList => {
+    // Read the CSV for that coin
+    const coinHistoryFile = readFileSync(`${dirname}/coins/${coinList.id}.csv`);
+    const coinHistoryData = parseSync(coinHistoryFile, {columns: true});
 
-  // Grab data for our chosen day
-  const matchingRecords = coinHistoryData.filter(record => {
-    return +record.timestamp === STARTING_TIMESTAMP;
-  });
+    // Grab data for our chosen day
+    const matchingRecords = coinHistoryData.filter(record => {
+      return +record.timestamp === timestamp;
+    });
 
-  if (matchingRecords.length > 0) {
-    const record = matchingRecords[0];
-    return {
-      coinId: record.coinId,
-      timestamp: +record.timestamp,
-      readableTimestamp: record.readableTimestamp,
-      price: +record.price,
-      marketCap: +record.marketCap,
-      totalVolume: +record.totalVolume,
+    if (matchingRecords.length > 0) {
+      const record = matchingRecords[0];
+      return {
+        coinId: record.coinId,
+        timestamp: +record.timestamp,
+        readableTimestamp: record.readableTimestamp,
+        price: +record.price,
+        marketCap: +record.marketCap,
+        totalVolume: +record.totalVolume,
+      }
     }
-  }
-  else {
-    return undefined;
-  }
-});
-const onThisDayData = _.compact(onThisDayDataRaw);
-// console.log(onThisDayData);
-
-// Write this to a file
-// Write to file
-stringify(onThisDayData, {header: true}, (err, output) => {
-  writeFile(`${dirname}/history/${STARTING_TIMESTAMP}.csv`, output, () => {
-    console.log("done");
+    else {
+      return undefined;
+    }
   });
-});
+  const onThisDayData = _.compact(onThisDayDataRaw);
+  // console.log(onThisDayData);
+
+  // Write this to a file
+  // Write to file
+  stringify(onThisDayData, {header: true}, (err, output) => {
+    writeFile(`${dirname}/history/${timestamp}.csv`, output, () => {
+      console.log("done " + timestamp);
+    });
+  });
+}
+
+// Jan 1
+extractPricesAt(1609459200000);
+// Today, 12/17/21
+extractPricesAt(1639699200000);
