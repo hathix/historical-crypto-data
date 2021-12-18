@@ -40,7 +40,7 @@ const dirname = process.cwd(); // Doesn't include the trailing slash
 //     createReadStream(`${dirname}/coins/${record.id}.csv`).pipe(innerParser);
 //   });
 // });
-// createReadStream(`${dirname}/coindata.csv`).pipe(parser);
+// createReadStream(`${dirname}/coinlist.csv`).pipe(parser);
 
 
 /**
@@ -52,7 +52,7 @@ function extractPricesAt(timestamp) {
   // const STARTING_TIMESTAMP = 1609459200000;
 
   // Read our list of all the top coins
-  const rawCoinData = readFileSync(`${dirname}/coindata.csv`);
+  const rawCoinData = readFileSync(`${dirname}/coinlist.csv`);
   const coinList = parseSync(rawCoinData, {columns: true});
   // console.log(records);
 

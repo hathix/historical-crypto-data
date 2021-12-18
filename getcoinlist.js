@@ -19,27 +19,27 @@ const CoinGeckoClient = new CoinGecko();
 // send to a CSV file.
 async function getCoinList() {
   // Get full list of coins. There are 50 per page, so grab a few.
-  console.log("Getting 0");
+  // console.log("Getting 0");
   let data0 = await CoinGeckoClient.coins.all({
     page: 1,
   });
-  console.log("Getting 1");
+  // console.log("Getting 1");
   let data1 = await CoinGeckoClient.coins.all({
     page: 2,
   });
-  console.log("Getting 2");
+  // console.log("Getting 2");
   let data2 = await CoinGeckoClient.coins.all({
     page: 3,
   });
-  console.log("Getting 3");
+  // console.log("Getting 3");
   let data3 = await CoinGeckoClient.coins.all({
     page: 4,
   });
-  console.log("Getting 4");
+  // console.log("Getting 4");
   let data4 = await CoinGeckoClient.coins.all({
     page: 5,
   });
-  console.log("Getting 5");
+  // console.log("Getting 5");
   let data5 = await CoinGeckoClient.coins.all({
     page: 6,
   });

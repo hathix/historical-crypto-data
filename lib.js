@@ -24,7 +24,7 @@ export const dirname = process.cwd(); // Doesn't include the trailing slash
 */
 export function getCoinList() {
   // Read our list of all the top coins
-  const coinFile = readFileSync(`${dirname}/coindata.csv`);
+  const coinFile = readFileSync(`${dirname}/coinlist.csv`);
   const coinList = parseSync(coinFile, {
     columns: true,
     cast: true,

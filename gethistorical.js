@@ -18,7 +18,7 @@ const CoinGeckoClient = new CoinGecko();
 // Outputs the historical pricing data for a given coin to CSV.
 async function getHistoricalDataFor(coinId) {
 
-  console.log("Getting ", coinId);
+  // console.log("Getting ", coinId);
 
   // This returns an object with { data: { prices, market_caps, total_volumes }}
   // And each of these is an array of `days` items. Each item includes the
@@ -102,4 +102,4 @@ const parser = parse({columns: true}, function (err, records) {
     }, 2000 * i, i);
   }
 });
-createReadStream(`${dirname}/coindata.csv`).pipe(parser);
+createReadStream(`${dirname}/coinlist.csv`).pipe(parser);
