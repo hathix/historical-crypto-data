@@ -43,7 +43,9 @@ export const DERIVATIVE_IDS = [
   "staked-ether",
   "ankreth",
   "wrapped-bitcoin",
-  "wrapped-nxm",
+  // "wrapped-nxm",
+  "nxm", // This is an internal-only token that can't be traded;
+         // wrapped-nxm is the equivalent that can be traded
   "wrapped-centrifuge",
   "compound-ether",
   "compound-usd-coin",

@@ -58,7 +58,7 @@ export function calcMarketCapWeightedIndex(sortedMarketData, topN) {
 /**
   Computes the index for each day we've tracked.
 */
-const generateIndexEveryDay() {
+export function generateIndexEveryDay() {
   // Get a list of all the timestamps we've tracked. Pull up the oldest coin
   // (Bitcoin) and extract its list of timestamps.
   const timestamps = getHistoricalData("bitcoin").map(record => record.timestamp);
@@ -84,5 +84,24 @@ const generateIndexEveryDay() {
     };
   });
 
-  console.log(indicesPerDay);
+  // console.log(indicesPerDay);
+
+  // Write this to file
+  writeDictToCsv(indicesPerDay, "indices.csv");
 }
+
+// generateIndexEveryDay();
+
+// console.log(calcMarketDataOn(dateToTimestamp("December 18, 2021")));
+
+/**
+  Calculates market data (i.e. the list of the top coins and their
+  market caps, etc.) for the given timestamp, and writes it to a CSV.
+*/
+export function recordMarketDataOn(timestamp) {
+  const marketData = calcMarketDataOn(timestamp);
+
+  writeDictToCsv(marketData, `topcoins/${timestamp}.csv`);
+}
+
+recordMarketDataOn(dateToTimestamp("December 18, 2021"));
