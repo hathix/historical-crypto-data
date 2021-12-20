@@ -53,6 +53,7 @@ export const DERIVATIVE_IDS = [
   "compound-basic-attention-token",
   "compound-uniswap",
   "compound-0x",
+  "cdai",
   "defipulse-index",
   "lido-staked-sol",
   "msol",
