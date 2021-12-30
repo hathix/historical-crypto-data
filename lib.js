@@ -148,3 +148,10 @@ export function getAllSupportedTimestamps() {
 
   return realTimestamps;
 }
+
+/**
+  Returns a nice stringified representation of the given timestamp.
+*/
+export function makeReadableTimestamp(timestamp) {
+  return new Date(timestamp).toLocaleString('en-US', { timeZone: 'UTC' });
+}
