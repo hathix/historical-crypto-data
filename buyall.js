@@ -138,6 +138,13 @@ export function run() {
   });
 
   console.log(holdingsPerDay[360]);
+
+  // TODO: extract just timestamp/readable/performance for each day
+  // and write that to CSV
+  // Then also, for each day, extract the holdings info and show its
+  // performance. Write that to a series of CSVs, one per timestamp.
+  // Only the last one will really be of interest (it'll show the biggest
+  // winners and losers over the last year-plus). Could be cool if sorted.
 }
 
 
