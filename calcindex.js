@@ -104,4 +104,4 @@ export function recordMarketDataOn(timestamp) {
   writeDictToCsv(marketData, `topcoins/${timestamp}.csv`);
 }
 
-recordMarketDataOn(dateToTimestamp("December 18, 2021"));
+// recordMarketDataOn(dateToTimestamp("December 18, 2021"));
