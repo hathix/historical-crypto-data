@@ -115,12 +115,29 @@ export function run() {
       h => h.valueOfHoldings));
     const totalCostBasis = _.sum(holdingsForThisDay.map(
       h => h.costBasis));
-    const performance = totalPortfolioValue / totalCostBasis;
+    // Like before, compute the performance: value divided by cost basis.
+    // 1.50 means 50% gain, 0.80 means 20% loss, etc.
+    const overallPerformance = totalPortfolioValue / totalCostBasis;
 
-    console.log(timestamp, totalPortfolioValue, totalCostBasis, performance);
+    // console.log(timestamp, totalPortfolioValue, totalCostBasis, performance);
+
+    // Now report all of this mountain of data
+    return {
+      // Metadata
+      timestamp: timestamp,
+      readableTimestamp: makeReadableTimestamp(timestamp),
+
+      // Overall data
+      totalPortfolioValue: totalPortfolioValue,
+      totalCostBasis: totalCostBasis,
+      overallPerformance: overallPerformance,
+
+      // Per-day data
+      holdings: holdingsForThisDay,
+    };
   });
 
-  // console.log(holdingsPerDay[5]);
+  console.log(holdingsPerDay[360]);
 }
 
 
