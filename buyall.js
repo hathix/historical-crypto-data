@@ -35,16 +35,24 @@ export function computeHoldingsOf(coinData, dollarsToBuy) {
 }
 
 
-// export function
-// console.log(getTopNCoinsOn(10, 1639785600000).map(c => computeHoldingsOf(c, 1000)));
-
-export function run() {
+/**
+  Computes how well your portfolio would have done if you'd bought an equal
+  amount of the top `N` coins at the beginning of the period we're testing.
+  Returns an array of performance data for each day in the dataset. For each
+  day we have:
+    - the total portfolio value
+    - the cost basis
+    - the performance of the portfolio
+    - the individual prices and performances of all `N` coins that you
+      "bought"
+*/
+export function computeBuyAllPerformance(topN) {
   // Get the oldest data we have
   const timestampsAvailable = getAllSupportedTimestamps();
   const oldestTimestamp = timestampsAvailable[0];
 
-  // Now let's imagine we bought the top 100 coins available then
-  const topCoinsOnOldestDay = getTopNCoinsOn(100, oldestTimestamp);
+  // Now let's imagine we bought the top N coins available then
+  const topCoinsOnOldestDay = getTopNCoinsOn(topN, oldestTimestamp);
 
   // Let's imagine we bought, say, $1000 of each
   const ourPortfolio = topCoinsOnOldestDay.map(coinData =>
@@ -137,7 +145,58 @@ export function run() {
     };
   });
 
-  console.log(holdingsPerDay[360]);
+  return holdingsPerDay;
+}
+
+
+// export function
+// console.log(getTopNCoinsOn(10, 1639785600000).map(c => computeHoldingsOf(c, 1000)));
+
+export function run() {
+  // Figure out how well our strategy would have done over the year or so
+  // we have data for
+  // One variable we can change is the number of coins we'd buy: the top N.
+  // Let's vary that amount and store the results (namely, performance for
+  // every day in the year.)
+  const topNs = [1, 2, 5, 10, 20, 50, 100, 200, 500];
+
+  const resultsPerN = topNs.map(topN => {
+    return {
+      topN: topN,
+      results: computeBuyAllPerformance(topN),
+    };
+  });
+
+  console.log(resultsPerN);
+
+  // Let's rearrange this so that we get one entry per timestamp. This will be
+  // easier to analyze in CSV format.
+  const timestamps = getAllSupportedTimestamps();
+
+  const resultPerTimestamp = timestamps.map(timestamp => {
+    // Construct an object and add a field for each of the top N's
+    const resultsObj = {
+      timestamp: timestamp,
+      readableTimestamp: makeReadableTimestamp(timestamp),
+    };
+
+    // Now store the performance of each of the top N's
+    topNs.forEach(n => {
+      // Grab performance data for N (a number). The result will contain,
+      // most notably, a value from `computeBuyAllPerformance`.
+      const dataForN = _.filter(resultsPerN, results => results.topN === n)[0];
+
+      resultsObj[`top${n}`] = dataForN.results.overallPerformance;
+    });
+
+    console.log(resultsObj);
+  });
+
+  // const strategyPerformance = computeBuyAllPerformance(100);
+
+  // Let's write the results
+
+  // console.log(strategyPerformance[364]);
 
   // TODO: extract just timestamp/readable/performance for each day
   // and write that to CSV
