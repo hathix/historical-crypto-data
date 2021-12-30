@@ -133,3 +133,18 @@ export function getMarketDataOn(timestamp) {
   // so exclude those.
   return marketList.filter(record => record.coinId.length > 0);
 }
+
+/**
+  Returns a list of all timestamps that we have proper market data for.
+*/
+export function getAllSupportedTimestamps() {
+  // Get a list of all the timestamps we've tracked. Pull up the oldest coin
+  // (Bitcoin) and extract its list of timestamps.
+  const timestamps = getHistoricalData("bitcoin").map(record => record.timestamp);
+
+  // Again ignore the final timestamp since that's an incomplete one
+  // for like some random point in the day when we actually pulled the data
+  const realTimestamps = timestamps.slice(0, -1);
+
+  return realTimestamps;
+}

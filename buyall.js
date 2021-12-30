@@ -1,4 +1,4 @@
-import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv } from "./lib.js";
+import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps } from "./lib.js";
 import { calcMarketDataOn } from "./calcindex.js";
 
 import _ from "lodash";
@@ -24,7 +24,7 @@ export function getTopNCoinsOn(n, timestamp) {
 export function computeHoldingsOf(coinData, dollarsToBuy) {
   // Clone the object
   const newCoinData = _.clone(coinData);
-  
+
   // Add a new field that's simply the dollars divided by the price
   newCoinData.numCoinsHeld = dollarsToBuy / newCoinData.price;
   // Also report the original cost basis, just so we have it
@@ -36,4 +36,23 @@ export function computeHoldingsOf(coinData, dollarsToBuy) {
 
 
 // export function
-console.log(getTopNCoinsOn(10, 1639785600000).map(c => computeHoldingsOf(c, 1000)));
+// console.log(getTopNCoinsOn(10, 1639785600000).map(c => computeHoldingsOf(c, 1000)));
+
+export function run() {
+  // Get the oldest data we have
+  const timestampsAvailable = getAllSupportedTimestamps();
+  const oldestTimestamp = timestampsAvailable[0];
+
+  // Now let's imagine we bought the top 100 coins available then
+  const topCoinsOnOldestDay = getTopNCoinsOn(100, oldestTimestamp);
+
+  // Let's imagine we bought, say, $1000 of each
+  const ourHoldings = topCoinsOnOldestDay.map(coinData =>
+    computeHoldingsOf(coinData, 1000));
+
+  // Print what we'd have
+  console.log(ourHoldings);
+}
+
+
+run();
