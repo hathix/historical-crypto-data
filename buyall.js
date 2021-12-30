@@ -167,7 +167,9 @@ export function run() {
     };
   });
 
-  console.log(resultsPerN);
+  // console.log(resultsPerN);
+
+  // return;
 
   // Let's rearrange this so that we get one entry per timestamp. This will be
   // easier to analyze in CSV format.
@@ -186,7 +188,15 @@ export function run() {
       // most notably, a value from `computeBuyAllPerformance`.
       const dataForN = _.filter(resultsPerN, results => results.topN === n)[0];
 
-      resultsObj[`top${n}`] = dataForN.results.overallPerformance;
+      // Now we need to go into this item's `results` and find the entry
+      // for this day
+      const dayByDayResults = dataForN.results;
+      // Now filter for just this day
+      const resultsForThisDay = _.filter(dayByDayResults,
+        day => day.timestamp === timestamp)[0];
+
+      // Now we can grab the performance for this day, for this N
+      resultsObj[`top${n}`] = resultsForThisDay.overallPerformance;
     });
 
     console.log(resultsObj);

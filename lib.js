@@ -146,6 +146,9 @@ export function getAllSupportedTimestamps() {
   // for like some random point in the day when we actually pulled the data
   const realTimestamps = timestamps.slice(0, -1);
 
+  // Cut it down for testing's sake
+  // return realTimestamps.slice(0,5);
+
   return realTimestamps;
 }
 
