@@ -278,7 +278,7 @@ export function computeValueOfBasketsOn(timestamp) {
     const coinsWithCurrentPerformance = computeBasketValue(
       basket, marketDataOnThisDay);
 
-    console.log(coinsWithCurrentPerformance);
+    // console.log(coinsWithCurrentPerformance);
 
     // Later we might print this to file. But for now, let's just sum
     // up all the holdings and cost bases.
@@ -297,9 +297,49 @@ export function computeValueOfBasketsOn(timestamp) {
   });
 }
 
-console.log(computeValueOfBasketsOn(1610323200000));
+// console.log(computeValueOfBasketsOn(1610323200000));
 
-//
-// export function computeAllIndices() {
-//
-// }
+
+export function computeAllIndices() {
+  // Like before, get some essential data to start with
+  // Get the list of all coins we've tracked
+  const extendedCoinList = getExtendedCoinList();
+  // Figure out which timestamps we care about
+  const timestamps = getAllSupportedTimestamps();
+
+
+  // Go through each timestamp and compute the indices
+  // and basket performances. (Indices will be a huge number,
+  // basket performances will be something around 1. Not super clean
+  // but we can process the data in Google Sheets.)
+  const dataPerTimestamp = timestamps.map(timestamp => {
+    const indices = computeMoonAndRugIndices(timestamp);
+    const basketPerformances = computeValueOfBasketsOn(timestamp);
+
+    // Make an object and stuff these items in there
+    let dataObj = {
+      timestamp: timestamp,
+      readableTimestamp: makeReadableTimestamp(timestamp),
+    };
+
+    // Add the indices
+    indices.map((indexValue, i) => {
+      // Figure out how many coins were included in this index
+      const indexSize = MOON_AND_RUG_SIZES[i];
+      // Now write it
+      dataObj[`m&r-${indexSize}`] = indexValue;
+    });
+
+    // Add the basket valeus
+    basketPerformances.map((basketPerformance, i) => {
+      // Like before, figure out the basket size
+      const basketSize = basketPerformance.basketSize;
+      // Now write it
+      dataObj[`basket-${basketSize}`] = basketPerformance.totalPerformance;
+    });
+
+    return dataObj;
+  });
+
+  console.log(dataPerTimestamp[0]);
+}
