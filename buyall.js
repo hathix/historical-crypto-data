@@ -14,8 +14,10 @@ export function getTopNCoinsOn(n, timestamp) {
   // Get just the top N of these
   const topNCoins = coinListSorted.slice(0, n);
 
-  // TODO: ignore the coins with zero market cap, they're basically
+  // CONSIDER: ignore the coins with zero market cap, they're basically
   // tiny shitcoins you can't buy anywhere
+  // Although TBF, even if their market cap is zero their price can
+  // still be nonzero... it just means there's like zero volume
 
   return topNCoins;
 }

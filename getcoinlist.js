@@ -3,6 +3,7 @@
 import { stringify } from 'csv-stringify';
 import { parse } from 'csv-parse';
 import { writeFile, createReadStream } from 'fs';
+import { writeDictToCsv } from "./lib.js";
 import _ from 'lodash';
 
 
@@ -65,6 +66,8 @@ async function getCoinList() {
     page: 10,
     per_page: 250,
   });
+
+  console.log("Got all 10 pages");
 
   // Merge all of these pages into one big list of coin data
   const fullCoinList = [
