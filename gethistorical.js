@@ -77,9 +77,12 @@ const parser = parse({columns: true}, function (err, records) {
   // We get 50 operations per minute with the API, so about every ~2 seconds
   // let's grab data for another coin.
   for (let i = 0; i < records.length; i++) {
+    // TEMP: let's start over from 1950 since our scraper broke
+    // halfway thru
     setTimeout((i) => {
-      console.log(`Getting data for ${i}: ${records[i].name}`);
-      getHistoricalDataFor(records[i].id);
+      const j = i + 1950;
+      console.log(`Getting data for ${j}: ${records[j].name}`);
+      getHistoricalDataFor(records[j].id);
     }, 2000 * i, i);
   }
 });
