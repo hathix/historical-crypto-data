@@ -14,6 +14,9 @@ export function getTopNCoinsOn(n, timestamp) {
   // Get just the top N of these
   const topNCoins = coinListSorted.slice(0, n);
 
+  // TODO: ignore the coins with zero market cap, they're basically
+  // tiny shitcoins you can't buy anywhere
+
   return topNCoins;
 }
 
