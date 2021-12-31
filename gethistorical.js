@@ -80,7 +80,7 @@ const parser = parse({columns: true}, function (err, records) {
     // If you want to scrape from the in the future, set j=i.
     // If you want to start halfway through, set j = i + something
     setTimeout((i) => {
-      const j = i;
+      const j = 1900 + i;
       console.log(`Getting data for ${j}: ${records[j].name}`);
       getHistoricalDataFor(records[j].id);
     }, 2000 * i, i);

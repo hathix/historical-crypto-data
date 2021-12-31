@@ -33,6 +33,26 @@ export function getCoinList() {
 }
 
 /**
+  Gets data on all 2500 coins in the extended list.
+*/
+export function getExtendedCoinList() {
+  return readDictFromCSV("fullcoinlist.csv");
+}
+
+/**
+  Reads the CSV from the given file into a CSV. No need to put
+  the directory name at the front; we'll append that. Just pass
+  like `filename.txt`.
+*/
+export function readDictFromCSV(filename) {
+  const file = readFileSync(`${dirname}/${filename}`);
+  return parseSync(file, {
+    columns: true,
+    cast: true,
+  });
+}
+
+/**
   Synchronously gets the historical market data for a coin with the
   given ID (use getCoinList() for a list of those).
   The returned value is an array of dicts, each of which represents a certain
