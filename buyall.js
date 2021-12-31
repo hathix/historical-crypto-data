@@ -175,7 +175,7 @@ export function run() {
   // easier to analyze in CSV format.
   const timestamps = getAllSupportedTimestamps();
 
-  const resultPerTimestamp = timestamps.map(timestamp => {
+  const resultsPerTimestamp = timestamps.map(timestamp => {
     // Construct an object and add a field for each of the top N's
     const resultsObj = {
       timestamp: timestamp,
@@ -200,7 +200,15 @@ export function run() {
     });
 
     console.log(resultsObj);
+    return resultsObj;
   });
+
+
+  // Write the high-level results (performance by day for each topN) to a CSV.
+  writeDictToCsv(resultsPerTimestamp, "buyall/overall-performance.csv");
+  console.log("Done writing");
+
+
 
   // const strategyPerformance = computeBuyAllPerformance(100);
 
