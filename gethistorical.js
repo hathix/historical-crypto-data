@@ -78,7 +78,8 @@ const parser = parse({columns: true}, function (err, records) {
   // let's grab data for another coin.
   for (let i = 0; i < records.length; i++) {
     // TEMP: let's start over from 1950 since our scraper broke
-    // halfway thru
+    // halfway through. If you want to scrape from the beginning
+    // in the future, just set j=i
     setTimeout((i) => {
       const j = i + 1950;
       console.log(`Getting data for ${j}: ${records[j].name}`);
