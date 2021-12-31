@@ -22,38 +22,48 @@ async function getCoinList() {
   // console.log("Getting 0");
   let data0 = await CoinGeckoClient.coins.all({
     page: 1,
+    per_page: 250,
   });
   // console.log("Getting 1");
   let data1 = await CoinGeckoClient.coins.all({
     page: 2,
+    per_page: 250,
   });
   // console.log("Getting 2");
   let data2 = await CoinGeckoClient.coins.all({
     page: 3,
+    per_page: 250,
   });
   // console.log("Getting 3");
   let data3 = await CoinGeckoClient.coins.all({
     page: 4,
+    per_page: 250,
   });
   // console.log("Getting 4");
   let data4 = await CoinGeckoClient.coins.all({
     page: 5,
+    per_page: 250,
   });
   // console.log("Getting 5");
   let data5 = await CoinGeckoClient.coins.all({
     page: 6,
+    per_page: 250,
   });
   let data6 = await CoinGeckoClient.coins.all({
     page: 7,
+    per_page: 250,
   });
   let data7 = await CoinGeckoClient.coins.all({
     page: 8,
+    per_page: 250,
   });
   let data8 = await CoinGeckoClient.coins.all({
     page: 9,
+    per_page: 250,
   });
   let data9 = await CoinGeckoClient.coins.all({
     page: 10,
+    per_page: 250,
   });
 
   // Merge all of these pages into one big list of coin data
@@ -79,14 +89,16 @@ async function getCoinList() {
     }
   });
 
-  // console.log(shortCoinList);
+  console.log(shortCoinList);
+
+  writeDictToCsv(shortCoinList, "fullcoinlist.csv");
 
   // Write to standard output; you can send it to a file
-  stringify(shortCoinList, {
-    header: true,
-  }, (err, output) => {
-    console.log(output);
-  });
+  // stringify(shortCoinList, {
+  //   header: true,
+  // }, (err, output) => {
+  //   console.log(output);
+  // });
 }
 
 getCoinList();
