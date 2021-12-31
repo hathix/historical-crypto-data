@@ -138,4 +138,54 @@ export function createBaskets() {
   });
 }
 
-createBaskets();
+// createBaskets();
+
+
+// The size of Moon&Rug market-cap-weighted indices we want to compute.
+// Like using the top 5, 10, etc. coins.
+export const MOON_AND_RUG_SIZES = [1, 2, 5, 10, 20, 50, 100];
+
+// The raw market caps in the Moon&Rug index will be divided by this.
+// 1e9 is a billion, so if the total market cap is 2 trillion (which it
+// is at the time of writing) then the index would be 2000, which is
+// a nice ballpark for an index. (An index of 2 is strange, as is one
+// of 2 million).
+export const MOON_AND_RUG_DIVISOR = 1e9;
+
+/**
+  Computes the market-cap-weighted indices for the given timestamp.
+  We'll return an array that corresponds to MOON_AND_RUG_SIZES,
+  with one index number per size.
+*/
+export function computeMoonAndRugIndices(timestamp) {
+  // Get the list of top coins on this day
+  const topNsCoins = getTopCoinsOnDayMultipleNs(
+    // This is the top N's: the top 1, 2, 5, etc.
+    MOON_AND_RUG_SIZES,
+    timestamp,
+  );
+
+  // Now we can compute the indices
+  return MOON_AND_RUG_SIZES.map((size, i) => {
+    // Get the market data on this day, for this index size
+    const coinsToInclude = topNsCoins[i];
+
+    // This includes a list of all the coins we need to make a
+    // market-cap-weighted average for
+
+    // Fortunately, all we have to do here is just sum up all
+    // the market caps and divide by a divisor
+    const sumOfMarketCaps = _.sumBy(coinsToInclude,
+      coin => coin.marketCap);
+
+    // Now just divide it by the divisor and that's it!
+    return sumOfMarketCaps / MOON_AND_RUG_DIVISOR;
+  });
+}
+
+console.log(computeMoonAndRugIndices(1610323200000));
+
+
+export function computeAllIndices() {
+
+}
