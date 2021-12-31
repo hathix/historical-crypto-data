@@ -183,9 +183,123 @@ export function computeMoonAndRugIndices(timestamp) {
   });
 }
 
-console.log(computeMoonAndRugIndices(1610323200000));
+// console.log(computeMoonAndRugIndices(1610323200000));
+
+// How many dollars we "spent" on each coin in our baskets.
+// Remember that a basket is the top N coins on day 1 of our
+// experiment, and we're imagining that we bought an equal dollar amount
+// of each.
+export const COST_BASIS_OF_EACH_COIN_IN_BASKET = 100;
 
 
-export function computeAllIndices() {
+/**
+  A helper function. Computes how much the given basket of coins
+  would be worth on a given day, given a full list of market data
+  (the list of all coins and their prices, market caps, etc.)
+  for the day in question.
+*/
+export function computeBasketValue(basket, marketDataOnThisDay) {
+  // For each coin in the basket, let's figure out how much it's
+  // currently worth
+  const coinsWithCurrentPerformance = basket.map(coin => {
+    // Figure out how much the coin is currently worth
+    const currentData = marketDataOnThisDay.filter(record => {
+      // Find the matching coin
+      return record.coinId === coin.coinId
+    })[0];
 
+    // If no coin was found, then currentData will be undefined.
+    // That would mean CoinGecko stopped tracking this coin, which
+    // would be strange. But we should handle it.
+    const currentPrice = currentData ? currentData.price : undefined;
+
+    return {
+      // Import old values
+      coinId: coin.coinId,
+      originalPrice: coin.originalPrice,
+      numCoinsHeld: coin.numCoinsHeld,
+      costBasis: coin.costBasis,
+
+      // Add new values
+      currentPrice: currentPrice,
+      // Be sure to guard for undefined. If CoinGecko doesn't track
+      // the coin, surely it's worthless.
+      currentHoldingsValue: currentPrice
+        ? currentPrice * coin.numCoinsHeld
+        : 0,
+      // Performance is just the ratio of the current to the
+      // purchase price. So if it's 3.0, then we've 3x'ed our money.
+      // Be sure to guard for undefined.
+      performance: currentPrice
+        ? currentPrice / coin.originalPrice
+        : 0,
+    };
+  });
+
+  return coinsWithCurrentPerformance;
 }
+
+/**
+  Computes the dollar value of the basket of currencies we'd "bought"
+  on day one of this experiment, on a given day.
+*/
+export function computeValueOfBasketsOn(timestamp) {
+  // Figure out what was in the baskets. We'll have one basket
+  // for each size we experimented with.
+  const basketContents = TOP_NS_FOR_BASKETS.map(n => {
+    return readDictFromCSV(`baskets/simple/top${n}.csv`);
+  });
+
+  // Figure out how much of each coin we'd have held on day 1.
+  // The basket contents will include the price of each coin on day 1.
+  const holdingsOfEachCoin = basketContents.map(basket => {
+    // This is now an array of coins. Here we can just simply store
+    // the coin ID and number of coins, TBH...
+    return basket.map(coin => {
+      return {
+        coinId: coin.coinId,
+        originalPrice: coin.price,
+        numCoinsHeld: COST_BASIS_OF_EACH_COIN_IN_BASKET / coin.price,
+        costBasis: COST_BASIS_OF_EACH_COIN_IN_BASKET,
+      };
+    });
+  });
+
+  // Now figure out how much each of these was worth on the day
+  // in question. First load the list of all coins in our dataset
+  // on this day.
+  const marketDataOnThisDay = readDictFromCSV(`perday/${timestamp}.csv`);
+
+  // console.log(marketDataOnThisDay);
+
+  // Now let's compute how much each basket would be worth on a given day
+  // We need to base this off how many coins we held on day 1.
+  return holdingsOfEachCoin.map(basket => {
+    const coinsWithCurrentPerformance = computeBasketValue(
+      basket, marketDataOnThisDay);
+
+    console.log(coinsWithCurrentPerformance);
+
+    // Later we might print this to file. But for now, let's just sum
+    // up all the holdings and cost bases.
+    const totalHoldingsValue = _.sumBy(coinsWithCurrentPerformance,
+      coin => coin.currentHoldingsValue);
+    const totalCostBasis = _.sumBy(coinsWithCurrentPerformance,
+      coin => coin.costBasis);
+    const totalPerformance = totalHoldingsValue / totalCostBasis;
+
+    return {
+      totalHoldingsValue: totalHoldingsValue,
+      totalCostBasis: totalCostBasis,
+      totalPerformance: totalPerformance,
+      basketSize: basket.length,
+    }
+  });
+}
+
+console.log(computeValueOfBasketsOn(1610323200000));
+
+//
+// export function computeAllIndices() {
+//
+// }
