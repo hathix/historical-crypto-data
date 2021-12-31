@@ -299,7 +299,11 @@ export function computeValueOfBasketsOn(timestamp) {
 
 // console.log(computeValueOfBasketsOn(1610323200000));
 
-
+/**
+  Returns an array of all the timestamps we tracked, plus the
+  performance of each Moon&Rug index and the performance of this
+  equal-weighted basket we constructed.
+*/
 export function computeAllIndices() {
   // Like before, get some essential data to start with
   // Get the list of all coins we've tracked
@@ -307,11 +311,13 @@ export function computeAllIndices() {
   // Figure out which timestamps we care about
   const timestamps = getAllSupportedTimestamps();
 
+  // We will be dividing the indices by their values on day 1 of
+  // our analysis, so it's all 1-based. So get that
+  const indexValuesOnDayOne = computeMoonAndRugIndices(timestamps[0]);
 
   // Go through each timestamp and compute the indices
-  // and basket performances. (Indices will be a huge number,
-  // basket performances will be something around 1. Not super clean
-  // but we can process the data in Google Sheets.)
+  // and basket performances. (Both will be normalized such that their
+  // value on day 1 of our experiment was 1.00.)
   const dataPerTimestamp = timestamps.map(timestamp => {
     const indices = computeMoonAndRugIndices(timestamp);
     const basketPerformances = computeValueOfBasketsOn(timestamp);
@@ -326,8 +332,10 @@ export function computeAllIndices() {
     indices.map((indexValue, i) => {
       // Figure out how many coins were included in this index
       const indexSize = MOON_AND_RUG_SIZES[i];
+      // Normalize the index value by dividing it by the starting value
+      const normalizedIndex = indexValue / indexValuesOnDayOne[i];
       // Now write it
-      dataObj[`m&r-${indexSize}`] = indexValue;
+      dataObj[`m&r-${indexSize}`] = normalizedIndex;
     });
 
     // Add the basket valeus
@@ -341,5 +349,9 @@ export function computeAllIndices() {
     return dataObj;
   });
 
-  console.log(dataPerTimestamp[0]);
+  return dataPerTimestamp;
 }
+
+// Let's grab and store this data
+const allIndices = computeAllIndices();
+writeDictToCsv(allIndices, "indices-and-baskets.csv");
