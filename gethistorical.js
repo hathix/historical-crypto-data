@@ -68,25 +68,6 @@ async function getHistoricalDataFor(coinId) {
   });
 }
 
-// These are the coins we care about (by coin ID)...
-// const coinsOfInterest = [
-//   'bitcoin',
-//   'ethereum',
-//   'binancecoin',
-//   'solana',
-//   'cardano',
-//   'ripple',
-//   'avalanche-2',
-//   'polkadot',
-//   'terra-luna',
-//   'dogecoin',
-//   'shiba-inu',
-//   'matic-network',
-//   'crypto-com-chain',
-//   'litecoin',
-//   'chainlink',
-//   'algorand',
-// ];
 
 // coinsOfInterest.forEach(coin => getHistoricalDataFor(coin));
 //
@@ -102,4 +83,4 @@ const parser = parse({columns: true}, function (err, records) {
     }, 2000 * i, i);
   }
 });
-createReadStream(`${dirname}/coinlist.csv`).pipe(parser);
+createReadStream(`${dirname}/fullcoinlist.csv`).pipe(parser);
