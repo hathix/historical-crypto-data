@@ -78,7 +78,7 @@ const parser = parse({columns: true}, function (err, records) {
   // let's grab data for another coin.
   for (let i = 0; i < records.length; i++) {
     setTimeout((i) => {
-      console.log(`Getting data for ${records[i].name}`);
+      console.log(`Getting data for ${i}: ${records[i].name}`);
       getHistoricalDataFor(records[i].id);
     }, 2000 * i, i);
   }
