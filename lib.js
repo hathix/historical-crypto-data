@@ -8,6 +8,8 @@ import { parse as parseSync } from 'csv-parse/sync';
 import { writeFile, createReadStream, createWriteStream, readFileSync } from 'fs';
 import _ from 'lodash';
 
+import { STABLECOIN_IDS, DERIVATIVE_IDS } from "./constants.js";
+
 // For reading/writing files
 export const dirname = process.cwd(); // Doesn't include the trailing slash
 
@@ -177,4 +179,14 @@ export function getAllSupportedTimestamps() {
 */
 export function makeReadableTimestamp(timestamp) {
   return new Date(timestamp).toLocaleString('en-US', { timeZone: 'UTC' });
+}
+
+/**
+  Given a list of coins, excludes the ones known to be stablecoins
+  and derivatives (e.g. Compound or wrapped versions).
+*/
+export function excludeStablecoinsAndDerivatives(coinList) {
+  return coinList
+    .filter(record => STABLECOIN_IDS.indexOf(record.coinId) === -1)
+    .filter(record => DERIVATIVE_IDS.indexOf(record.coinId) === -1);
 }
