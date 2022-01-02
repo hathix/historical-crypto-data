@@ -201,7 +201,7 @@ export const COST_BASIS_OF_EACH_COIN_IN_BASKET = 100;
 export function computeBasketValue(basket, marketDataOnThisDay) {
   // For each coin in the basket, let's figure out how much it's
   // currently worth
-  const coinsWithCurrentPerformance = basket.map(coin => {
+  const coinsWithCurrentPerformance = basket.map((coin, i) => {
     // Figure out how much the coin is currently worth
     const currentData = marketDataOnThisDay.filter(record => {
       // Find the matching coin
@@ -221,6 +221,7 @@ export function computeBasketValue(basket, marketDataOnThisDay) {
       costBasis: coin.costBasis,
 
       // Add new values
+      rankInBasket: i,
       currentPrice: currentPrice,
       // Be sure to guard for undefined. If CoinGecko doesn't track
       // the coin, surely it's worthless.
@@ -237,6 +238,21 @@ export function computeBasketValue(basket, marketDataOnThisDay) {
   });
 
   return coinsWithCurrentPerformance;
+}
+
+/**
+  Given a raw basket loaded from file, enhances it by
+  computing stuff like the original cost basis.
+*/
+export function enhanceBasketData(basket) {
+  return basket.map(coin => {
+    return {
+      coinId: coin.coinId,
+      originalPrice: coin.price,
+      numCoinsHeld: COST_BASIS_OF_EACH_COIN_IN_BASKET / coin.price,
+      costBasis: COST_BASIS_OF_EACH_COIN_IN_BASKET,
+    };
+  });
 }
 
 /**
@@ -366,7 +382,12 @@ export function loadAllBaskets() {
   // Figure out what was in the baskets. We'll have one basket
   // for each size we experimented with.
   return TOP_NS_FOR_BASKETS.map(n => {
-    return readDictFromCSV(`baskets/simple/top${n}.csv`);
+    // Get raw basket data from file
+    const rawBasketData = readDictFromCSV(`baskets/simple/top${n}.csv`);
+    // Now we need to enhance it and get stuff like the cost basis
+    const enhancedBasketData = enhanceBasketData(rawBasketData);
+
+    return enhancedBasketData;
   });
 }
 
@@ -388,7 +409,7 @@ export function computeFinalBasketPerformance(basket) {
 
   // Get market data for this timestamp
   const finalMarketData = readDictFromCSV(`perday/${lastTimestamp}.csv`);
-  console.log("F", finalMarketData);
+  // console.log("F", finalMarketData);
 
   // Compute basket's value at this time
   const finalBasketPerformance = computeBasketValue(
@@ -396,7 +417,7 @@ export function computeFinalBasketPerformance(basket) {
     finalMarketData
   );
 
-  console.log("P", finalBasketPerformance);
+  // console.log("P", finalBasketPerformance);
 
   // This is an array of coins, which includes stuff like performance
   // (which is what we really care about)
@@ -414,7 +435,10 @@ export function writeAllBasketsPerformance() {
 
   // For each, compute and write the performance
   baskets.map((basket, i) => {
-    if (i >= 2) { return; }
+    // if (i >= 2) { return; }
+
+    // console.log("B", basket);
+
     // Figure out how many coins are in this basket, for future reference
     const basketSize = TOP_NS_FOR_BASKETS[i];
 
