@@ -26,6 +26,12 @@ export const STABLECOIN_IDS = [
   "celo-euro",
   "seur",
   "stasis-eurs",
+  "usdx",
+  "dollars",
+  "empty-set-dollar",
+  "defidollar",
+  "dynamic-set-dollar",
+  "steem-dollars",
 ];
 
 /**
