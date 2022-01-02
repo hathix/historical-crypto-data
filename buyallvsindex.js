@@ -60,13 +60,6 @@ export function computePerDayData() {
   // indices for each
 }
 
-/**
-  Like the other topNCoinsOn, except this one requires you to pass
-  a list of the
-*/
-// const topNCoinsOn(allCoinData, n, timestamp) {
-//   // Get
-// }
 
 
 // computePerDayData();
@@ -142,8 +135,6 @@ export function createBaskets() {
     writeDictToCsv(topNCoinsDict, `baskets/simple/top${topN}.csv`);
   });
 }
-
-// createBaskets();
 
 
 // The size of Moon&Rug market-cap-weighted indices we want to compute.
@@ -373,10 +364,6 @@ export function computeAllIndices() {
   return dataPerTimestamp;
 }
 
-// Let's grab and store this data
-const allIndices = computeAllIndices();
-writeDictToCsv(allIndices, "indices-and-baskets.csv");
-
 
 /**
   Returns an array of baskets (each of which is an array of coin data).
@@ -458,4 +445,19 @@ export function writeAllBasketsPerformance() {
   });
 }
 
+
+
+
+/**
+  Run these if you want to recreate everything
+*/
+
+// Re-generate the list of baskets: fills in baskets/simple/...
+createBaskets();
+
+// Compute overall performance of the baskets
+const allIndices = computeAllIndices();
+writeDictToCsv(allIndices, "indices-and-baskets.csv");
+
+// Compute granular performance of each coin in each basket
 writeAllBasketsPerformance();
