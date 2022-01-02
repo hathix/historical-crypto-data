@@ -353,5 +353,63 @@ export function computeAllIndices() {
 }
 
 // Let's grab and store this data
-const allIndices = computeAllIndices();
-writeDictToCsv(allIndices, "indices-and-baskets.csv");
+// const allIndices = computeAllIndices();
+// writeDictToCsv(allIndices, "indices-and-baskets.csv");
+
+
+/**
+  Returns an array of baskets (each of which is an array of coin data).
+  This covers all the "buy each of the top N coins" baskets we
+  tracked for this experiment.
+*/
+export function loadAllBaskets() {
+  // Figure out what was in the baskets. We'll have one basket
+  // for each size we experimented with.
+  return TOP_NS_FOR_BASKETS.map(n => {
+    return readDictFromCSV(`baskets/simple/top${n}.csv`);
+  });
+}
+
+
+/**
+  Computes and returns the year-long performance of all the coins
+  in the given basket. Returns a dictionary with one entry per coin,
+  each of which includes `performance` among others.
+*/
+export function computeFinalBasketPerformance(basket) {
+  // Like before, get some essential data to start with
+  // Get the list of all coins we've tracked
+  const extendedCoinList = getExtendedCoinList();
+  // Figure out which timestamps we care about
+  const timestamps = getAllSupportedTimestamps();
+
+  // Get the market data on the last day in our sample
+  const lastTimestamp = timestamps[timestamps.length - 1];
+
+  // Get market data for this timestamp
+  const finalMarketData = readDictFromCSV(`perday/${lastTimestamp}.csv`);
+
+  // Compute basket's value at this time
+  const finalBasketPerformance = computeBasketValue(
+    basket,
+    finalMarketData
+  );
+
+  // This is an array of coins, which includes stuff like performance
+  // (which is what we really care about)
+  // You can write it to file yourself
+  return finalBasketPerformance;
+}
+
+
+/**
+  Computes the performance of all baskets and writes it to file.
+*/
+export function writeAllBasketsPerformance() {
+  // Get all the baskets we care about
+  const baskets = loadAllBaskets();
+
+  console.log(baskets[1]);
+}
+
+writeAllBasketsPerformance();
