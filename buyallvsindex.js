@@ -81,12 +81,17 @@ export function getTopCoinsOnDayMultipleNs(topNs, timestamp) {
   // caps, etc.)
   const dataForThisDay = readDictFromCSV(`perday/${timestamp}.csv`);
 
+  // Cut out the empty objects: these ones lack fields like
+  // coin ID.
+  const nonEmptyData = dataForThisDay.filter(record => record.coinId);
+
   // Sort this list of coins by market cap descending (hence the -1).
   const sortedData = _.sortBy(
-    dataForThisDay, coin => coin.marketCap * -1);
+    nonEmptyData, coin => coin.marketCap * -1);
 
   // Exclude the stablecoins and derivatives
   const cleanedData = excludeStablecoinsAndDerivatives(sortedData);
+  // console.log("V", sortedData.length, cleanedData.length, sortedData.length - cleanedData.length);
 
   // Extract just the top N of these, for each N
   // (so like the top 5, 10, 20, etc.)

@@ -205,11 +205,12 @@ export function doesStringMatchAnyRegex(string, regexes) {
 */
 export function excludeStablecoinsAndDerivatives(coinList) {
   return coinList
-    .filter(record => STABLECOIN_IDS.indexOf(record.coinId) === -1)
-    .filter(record => DERIVATIVE_IDS.indexOf(record.coinId) === -1)
     .filter(record => {
-      // Exclude anything that matches the regexes
-      return !(doesStringMatchAnyRegex(record.coinId,
-        [...STABLECOIN_REGEXES, ...DERIVATIVE_REGEXES]));
+      // Exclude anything that's in the list of stablecoins or
+      // derivatives (using either our string list or regex list)
+      return STABLECOIN_IDS.indexOf(record.coinId) === -1
+        && DERIVATIVE_IDS.indexOf(record.coinId) === -1
+        && !(doesStringMatchAnyRegex(record.coinId,
+          [...STABLECOIN_REGEXES, ...DERIVATIVE_REGEXES]));
     });
 }
