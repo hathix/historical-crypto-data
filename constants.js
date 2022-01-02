@@ -26,6 +26,9 @@ export const STABLECOIN_IDS = [
   "celo-euro",
   "seur",
   "stasis-eurs",
+  // Several of the below coins are hilariously bad. Nominally
+  // stablecoins, they've often collapsed and are now worth like
+  // 10 cents.
   "usdx",
   "dollars",
   "empty-set-dollar",
