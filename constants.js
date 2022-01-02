@@ -23,6 +23,7 @@ export const STABLECOIN_IDS = [
   "paxos-standard",
   "neutrino",
   "iron-bank-euro",
+  "celo-euro",
   "seur",
   "stasis-eurs",
 ];
@@ -62,8 +63,17 @@ export const DERIVATIVE_IDS = [
 ];
 
 // Same as above, but regexes to catch consistently-named tokens
-export const STABLECOIN_REGEXES = [];
+export const STABLECOIN_REGEXES = [
+  // Catch some easy-to-find USD coins
+  /-usd$/i,
+  /-eur$/i,
+];
 
 export const DERIVATIVE_REGEXES = [
+  // Ignore Mirrored coins
   /^mirrored-/i,
+  // Ignore Compound coins, besides the native compound governance token
+  /^compound-(?!governance)/i,
+  // And wrapped coins
+  /wrapped-/i,
 ];

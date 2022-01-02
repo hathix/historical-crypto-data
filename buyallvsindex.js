@@ -369,8 +369,8 @@ export function computeAllIndices() {
 }
 
 // Let's grab and store this data
-// const allIndices = computeAllIndices();
-// writeDictToCsv(allIndices, "indices-and-baskets.csv");
+const allIndices = computeAllIndices();
+writeDictToCsv(allIndices, "indices-and-baskets.csv");
 
 
 /**

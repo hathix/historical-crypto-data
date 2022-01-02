@@ -8,7 +8,7 @@ import { parse as parseSync } from 'csv-parse/sync';
 import { writeFile, createReadStream, createWriteStream, readFileSync } from 'fs';
 import _ from 'lodash';
 
-import { STABLECOIN_IDS, DERIVATIVE_IDS } from "./constants.js";
+import { STABLECOIN_IDS, DERIVATIVE_IDS, STABLECOIN_REGEXES, DERIVATIVE_REGEXES } from "./constants.js";
 
 // For reading/writing files
 export const dirname = process.cwd(); // Doesn't include the trailing slash
@@ -182,11 +182,34 @@ export function makeReadableTimestamp(timestamp) {
 }
 
 /**
+  Returns true if the given string matches ANY regex in the given array,
+  else false.
+*/
+export function doesStringMatchAnyRegex(string, regexes) {
+  // Just loop through each regex and short-circuit once we've found
+  // one that matches
+  for (let i = 0; i < regexes.length; i++) {
+    if (regexes[i].test(string)) {
+      return true;
+    }
+  }
+  // If we've gotten here, nothing matches
+  return false;
+}
+
+
+
+/**
   Given a list of coins, excludes the ones known to be stablecoins
   and derivatives (e.g. Compound or wrapped versions).
 */
 export function excludeStablecoinsAndDerivatives(coinList) {
   return coinList
     .filter(record => STABLECOIN_IDS.indexOf(record.coinId) === -1)
-    .filter(record => DERIVATIVE_IDS.indexOf(record.coinId) === -1);
+    .filter(record => DERIVATIVE_IDS.indexOf(record.coinId) === -1)
+    .filter(record => {
+      // Exclude anything that matches the regexes
+      return !(doesStringMatchAnyRegex(record.coinId,
+        [...STABLECOIN_REGEXES, ...DERIVATIVE_REGEXES]));
+    });
 }
