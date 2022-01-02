@@ -448,8 +448,8 @@ export function writeAllBasketsPerformance() {
     console.log(performance);
 
     // Write it
-    // writeDictToCsv(performance,
-    //   `baskets/simple/results/top${basketSize}.csv`);
+    writeDictToCsv(performance,
+      `baskets/simple/results/top${basketSize}.csv`);
   });
 }
 
