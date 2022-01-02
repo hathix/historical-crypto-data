@@ -449,15 +449,16 @@ export function writeAllBasketsPerformance() {
 
 
 /**
-  Run these if you want to recreate everything
+  Run these if you want to recreate everything.
+  Try to do one function at a time, in separate terminal runs
 */
 
 // Re-generate the list of baskets: fills in baskets/simple/...
-createBaskets();
+// createBaskets();
 
 // Compute overall performance of the baskets
-const allIndices = computeAllIndices();
-writeDictToCsv(allIndices, "indices-and-baskets.csv");
+// const allIndices = computeAllIndices();
+// writeDictToCsv(allIndices, "indices-and-baskets.csv");
 
 // Compute granular performance of each coin in each basket
 writeAllBasketsPerformance();
