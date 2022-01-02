@@ -57,4 +57,13 @@ export const DERIVATIVE_IDS = [
   "defipulse-index",
   "lido-staked-sol",
   "msol",
+  "tether-gold",
+  "tether-eurt",
+];
+
+// Same as above, but regexes to catch consistently-named tokens
+export const STABLECOIN_REGEXES = [];
+
+export const DERIVATIVE_REGEXES = [
+  /^mirrored-/i,
 ];
