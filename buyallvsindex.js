@@ -383,17 +383,20 @@ export function computeFinalBasketPerformance(basket) {
   // Figure out which timestamps we care about
   const timestamps = getAllSupportedTimestamps();
 
-  // Get the market data on the last day in our sample
+  // Get the market data on the last day in our sample.
   const lastTimestamp = timestamps[timestamps.length - 1];
 
   // Get market data for this timestamp
   const finalMarketData = readDictFromCSV(`perday/${lastTimestamp}.csv`);
+  console.log("F", finalMarketData);
 
   // Compute basket's value at this time
   const finalBasketPerformance = computeBasketValue(
     basket,
     finalMarketData
   );
+
+  console.log("P", finalBasketPerformance);
 
   // This is an array of coins, which includes stuff like performance
   // (which is what we really care about)
@@ -409,7 +412,21 @@ export function writeAllBasketsPerformance() {
   // Get all the baskets we care about
   const baskets = loadAllBaskets();
 
-  console.log(baskets[1]);
+  // For each, compute and write the performance
+  baskets.map((basket, i) => {
+    if (i >= 2) { return; }
+    // Figure out how many coins are in this basket, for future reference
+    const basketSize = TOP_NS_FOR_BASKETS[i];
+
+    // Now compute performance
+    console.log(`Computing performance for basket of top ${basketSize}`);
+    const performance = computeFinalBasketPerformance(basket);
+    console.log(performance);
+
+    // Write it
+    // writeDictToCsv(performance,
+    //   `baskets/simple/results/top${basketSize}.csv`);
+  });
 }
 
 writeAllBasketsPerformance();
