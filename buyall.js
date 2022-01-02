@@ -204,7 +204,7 @@ export function run() {
       resultsObj[`top${n}`] = resultsForThisDay.overallPerformance;
     });
 
-    console.log(resultsObj);
+    // console.log(resultsObj);
     return resultsObj;
   });
 
