@@ -212,21 +212,6 @@ export function run() {
   // Write the high-level results (performance by day for each topN) to a CSV.
   writeDictToCsv(resultsPerTimestamp, "buyall/overall-performance.csv");
   console.log("Done writing");
-
-
-
-  // const strategyPerformance = computeBuyAllPerformance(100);
-
-  // Let's write the results
-
-  // console.log(strategyPerformance[364]);
-
-  // TODO: extract just timestamp/readable/performance for each day
-  // and write that to CSV
-  // Then also, for each day, extract the holdings info and show its
-  // performance. Write that to a series of CSVs, one per timestamp.
-  // Only the last one will really be of interest (it'll show the biggest
-  // winners and losers over the last year-plus). Could be cool if sorted.
 }
 
 
