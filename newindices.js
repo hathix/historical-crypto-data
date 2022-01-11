@@ -270,6 +270,26 @@ export const INDEX_GENERATOR_FUNCTIONS = [
 
 
 /**
+  Given an index generator function and a set of data of all the coins you care
+  to track, computes the value of that index.
+*/
+export function computeSingleIndexValue(coinData, generator) {
+  // The generator's sole job is to apply weights to the coin data.
+  // That `weight` value is just appended to the data objects, basially.
+  const coinsWithWeights = generator(coinData);
+
+  // Now
+  // OOF! we always need to compare an index against some benchmark
+  // since otherwise things like the equal-weighted index have no meaning.
+  // For equal-weighting, for instance, your weights will always sum to
+  // 1 * numCoins, since each coin has a weight of 1. So you can't just
+  // sum up the weights like I thought.
+
+  return 5;
+}
+
+
+/**
   Returns an array of index values (basically the weighted sum of all the
   coins in the sample, according to various weighting strategies) for the
   given set of coins -- which you could load from ther `perday` folder or
