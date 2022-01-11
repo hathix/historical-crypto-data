@@ -1,4 +1,4 @@
-import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct, scaleToSumToOne, toNDecimalPlaces, getFirstItemWhere } from "./lib.js";
+import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct, scaleToSumToOne, toNDecimalPlaces, getFirstItemWhere, getMultiplesUpTo } from "./lib.js";
 import { getTopCoinsOnDayMultipleNs, MOON_AND_RUG_DIVISOR, MOON_AND_RUG_SIZES } from "./buyallvsindex.js";
 import { makeMarketCapWeightedGenerator, makeSquareRootGenerator, makeEqualWeightedGenerator, makeCappedGenerator, INDEX_GENERATOR_FUNCTIONS } from "./newindices.js";
 
@@ -172,26 +172,50 @@ export function determineRebalanceDelta(lastRebalanceTimestamp, newRebalanceTime
   return buyAndSellOrders;
 }
 
-const availableTimestamps = getAllSupportedTimestamps();
-const result = determineRebalanceDelta(
-  // From oldest...
-  availableTimestamps[0],
-  // To newest...
-  availableTimestamps[availableTimestamps.length - 1],
-  // For testing, suppose we want to get the top few coins using the
-  // square-root strategy.
-  // I tested it with an equal-weighted generator and it worked too!
-  // In that case, it always returns a 0% change (stayed in index),
-  // -100% change (left index), or `null` change (joined index).
-  // It works with a market-cap-weighted generator too; it has pretty
-  // aggressive rebalancing since a coin could easily gain or lose
-  // a ton of its weight.
-  // makeSquareRootGenerator(10),
-  // makeMarketCapWeightedGenerator(100),
-  // makeEqualWeightedGenerator(100),
-  makeCappedGenerator(20, 10),
-);
 
-console.log("Old weights", _.sum(result.map(c => c.oldWeight)));
-console.log("New weights", _.sum(result.map(c => c.newWeight)));
-console.log("Churn", _.sum(result.map(c => Math.abs(c.weightIncrease))));
+/**
+  Determines what would happen if you rebalanced an index (computed with the
+  given generator) every `N` days throughout our sample.
+*/
+export function analyzeRebalancingSchedule(rebalanceIntervalDays, generator) {
+  // We first need to figure out all of the rebalancings we're going to do,
+  // realized as the list of timestamps we're going to rebalance on.
+  // We don't technically rebalance at timestamp 0 (the start of our sample).
+  const availableTimestamps = getAllSupportedTimestamps();
+  const timestampIndicesToRebalanceOn = getMultiplesUpTo(
+    rebalanceIntervalDays, availableTimestamps.length);
+
+  // Now look up the list of timestamps to actually rebalance on
+  const timestampsToRebalanceOn = timestampIndicesToRebalanceOn.map(
+    n => availableTimestamps[n]);
+
+  console.log("Rebalance on", timestampsToRebalanceOn.map(
+    t => makeReadableTimestamp(t)));
+}
+
+analyzeRebalancingSchedule(7, makeSquareRootGenerator(50));
+
+//
+// const availableTimestamps = getAllSupportedTimestamps();
+// const result = determineRebalanceDelta(
+//   // From oldest...
+//   availableTimestamps[0],
+//   // To newest...
+//   availableTimestamps[availableTimestamps.length - 1],
+//   // For testing, suppose we want to get the top few coins using the
+//   // square-root strategy.
+//   // I tested it with an equal-weighted generator and it worked too!
+//   // In that case, it always returns a 0% change (stayed in index),
+//   // -100% change (left index), or `null` change (joined index).
+//   // It works with a market-cap-weighted generator too; it has pretty
+//   // aggressive rebalancing since a coin could easily gain or lose
+//   // a ton of its weight.
+//   // makeSquareRootGenerator(10),
+//   // makeMarketCapWeightedGenerator(100),
+//   // makeEqualWeightedGenerator(100),
+//   makeCappedGenerator(20, 10),
+// );
+//
+// console.log("Old weights", _.sum(result.map(c => c.oldWeight)));
+// console.log("New weights", _.sum(result.map(c => c.newWeight)));
+// console.log("Churn", _.sum(result.map(c => Math.abs(c.weightIncrease))));

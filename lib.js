@@ -272,3 +272,26 @@ export function getFirstItemWhere(list, predicate) {
     return matches[0];
   };
 }
+//
+// /**
+//   Lets you modify an object without changing the original (basically,
+//   gives you a cloned version with your changes applied). We'll pass the
+//   new object to `changeFn`, and you can mutate state on there.
+// */
+// export function tweak(obj, changeFn) {
+//   // Clone it, apply the change, and return the clone
+//   const clone = _.cloneDeep(obj);
+//   changeFn(obj);
+// }
+
+/**
+  Returns all non-zero multiples of `n` up to but NOT including `max`.
+    getMultiplesUpTo(3, 13) => [3, 6, 9, 12]
+    getMultiplesUpTo(3, 12) => [3, 6, 9]
+*/
+export function getMultiplesUpTo(number, max) {
+  // Get a list of all numbers from [0, max), then filter for just
+  // the ones that are multiples
+  const nums = _.range(1, max);
+  return nums.filter(x => number % x === 0);
+}
