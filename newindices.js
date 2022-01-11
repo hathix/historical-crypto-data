@@ -15,10 +15,10 @@ import _ from "lodash";
   or some other basket-creating function to get coinData (it just needs
   fields like marketCap and price, really).
 */
-export function generateIndex(coinData, strategyFunction) {
-
-  // Pass the coin data through the strategy function
-  return strategyFunction(coinData);
+// export function generateIndex(coinData, strategyFunction) {
+//
+//   // Pass the coin data through the strategy function
+//   return strategyFunction(coinData);
 
 
   // // Get the list of top coins on this day
@@ -44,7 +44,7 @@ export function generateIndex(coinData, strategyFunction) {
   //   // Now just divide it by the divisor and that's it!
   //   return sumOfMarketCaps / MOON_AND_RUG_DIVISOR;
   // });
-}
+// }
 
 
 /**
@@ -148,18 +148,46 @@ export function makeMarketCapWeightedIndex(coinData, n) {
 /**
   Like above, but gives each coin in the index an equal weight.
 */
-export function makeEqualWeightedIndex(coin, n) {
+export function makeEqualWeightedIndex(coinData, n) {
   return generateTopNIndex(coinData, n, coin => {
     // Give each coin the same weight
     return 1;
   });
 }
 
+/**
+  Like before, but I heard that Pearson weighting is a method
+  that uses square roots to compromise between equal weighting
+  and capitalization-based weighting.
+*/
+export function makeSquareRootIndex(coinData, n) {
+  return generateTopNIndex(coinData, n, coin => {
+    // Square root of market cap
+    return Math.sqrt(coin.marketCap);
+  });
+}
+
 
 
 /**
-  A set of strategy functions (plus metadata) for making indices.
+  A set of generator functions (plus metadata) for making indices.
+  The idea is that, if you feed in a set of coin data, we can
+  compute all kinds of indices on it.
 */
-export const indexGeneratingStrategyFunctions = {
-
-};
+export const indexGeneratorFunctions = [
+  {
+    name: "moon_rug_50",
+    size: 50,
+    generator: coinData => makeMarketCapWeightedIndex(50),
+  },
+  {
+    name: "equal_weight_50",
+    size: 50,
+    generator: coinData => makeEqualWeightedIndex(50),
+  },
+  {
+    name: "square_root_50",
+    size: 50,
+    generator: coinData => makeSquareRootIndex(50),
+  },
+];

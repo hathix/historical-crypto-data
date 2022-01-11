@@ -461,4 +461,4 @@ export function writeAllBasketsPerformance() {
 // writeDictToCsv(allIndices, "indices-and-baskets.csv");
 
 // Compute granular performance of each coin in each basket
-writeAllBasketsPerformance();
+// writeAllBasketsPerformance();
