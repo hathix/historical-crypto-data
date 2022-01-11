@@ -185,12 +185,14 @@ export function analyzeRebalancingSchedule(rebalanceIntervalDays, generator) {
   const timestampIndicesToRebalanceOn = getMultiplesUpTo(
     rebalanceIntervalDays, availableTimestamps.length);
 
+  // console.log(timestampIndicesToRebalanceOn);
+
   // Now look up the list of timestamps to actually rebalance on
   const timestampsToRebalanceOn = timestampIndicesToRebalanceOn.map(
     n => availableTimestamps[n]);
-
-  console.log("Rebalance on", timestampsToRebalanceOn.map(
-    t => makeReadableTimestamp(t)));
+  //
+  // console.log("Rebalance on", timestampsToRebalanceOn.map(
+  //   t => makeReadableTimestamp(t)));
 }
 
 analyzeRebalancingSchedule(7, makeSquareRootGenerator(50));
