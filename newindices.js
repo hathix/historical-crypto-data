@@ -285,7 +285,7 @@ export function computeSingleIndexValue(coinData, generator) {
   // 1 * numCoins, since each coin has a weight of 1. So you can't just
   // sum up the weights like I thought.
 
-  return 5;
+  return 42;
 }
 
 
