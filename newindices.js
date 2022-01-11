@@ -1,4 +1,4 @@
-import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives } from "./lib.js";
+import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct } from "./lib.js";
 import { calcMarketDataOn } from "./calcindex.js";
 import { getTopCoinsOnDayMultipleNs, MOON_AND_RUG_DIVISOR, MOON_AND_RUG_SIZES } from "./buyallvsindex.js";
 
@@ -272,11 +272,62 @@ export const INDEX_GENERATOR_FUNCTIONS = [
 /**
   Given an index generator function and a set of data of all the coins you care
   to track, computes the value of that index.
+
+  Pass the set of all coins at the beginning of the sample period (the base
+  amount) plus the set of coins for the day you wish you compute an index for.
 */
-export function computeSingleIndexValue(coinData, generator) {
+export function computeSingleIndexValue(baselineCoinData, testCoinData, generator) {
+  // Like stock market indices, these indices only make sense when
+  // compared to some baseline. So instead of calculating some disembodied
+  // index number like we used to, we're going to compare today's market
+  // to the baseline and use that to compute the index itself.
+
+  // The way we do this is to compare the market caps of the coin at slot
+  // `i` for each coin in our sample. Then we'll see how much the market
+  // cap of coin `i` differs from the baseline. If every coin in the sample
+  // doubled, then our market index probably doubled as well.
+  // Note that we care about the _position_ of each coin, not the names of
+  // the coins. If coin 3 and coin 5 traded places, taking each other's market
+  // caps, nobody is really richer or poorer, so that should be a no-op.
+  // If an index fund rebalances properly, it should be able to capture
+  // the new coins that enter the index's range and the old ones that exit.
+
+  // OK, so first let's figure out the stats of the coins in the baseline.
+  // We really only care about the market caps of coin `i`, but we can
+  // use the generator to get this (since it filters for just the
+  // top N coins in the sample), so might as well.
+  const baselineWithWeights = generator(baselineCoinData);
+
+  // And similarly let's figure out the stats of the coins in the sample.
+  // THIS is where the weighting becomes important.
+  const testWithWeights = generator(testCoinData);
+
+  // Now the trick is that we compute the change in market cap for the coin
+  // at `i` (as a fraction, where 1 = no change, 2 = doubled, .7 = 30% down,
+  // etc.) Then we just take the weighted average of those changes to see
+  // the overall index change.
+  const marketCapChanges = testWithWeights.map((testCoin, i) => {
+    // Get the corresponding coin at `i` in the baseline data
+    const baselineCoin = baselineWithWeights[i];
+
+    // Now just compare the market caps.
+    return testCoin.marketCap / baselineCoin.marketCap;
+  });
+
+  // Now let's just get the list of weights
+  const weights = testWithWeights.map(coin => coin.weight);
+
+  // Now take a weighted arithmetic mean of the changes, based on weight.
+  // We do a sort of dot product here.
+  const weightedAverage = dotProduct(marketCapChanges, weights);
+
+
+  // I think this works??
+  return weightedAverage;
+
   // The generator's sole job is to apply weights to the coin data.
   // That `weight` value is just appended to the data objects, basially.
-  const coinsWithWeights = generator(coinData);
+  // const coinsWithWeights = generator(coinData);
 
   // Now
   // OOF! we always need to compare an index against some benchmark
@@ -284,8 +335,12 @@ export function computeSingleIndexValue(coinData, generator) {
   // For equal-weighting, for instance, your weights will always sum to
   // 1 * numCoins, since each coin has a weight of 1. So you can't just
   // sum up the weights like I thought.
+  // So we need to get some baseline coinData from like the 1st day
+  // in the sample.
+  // Or we might need to simulate the building of the entire index from
+  // day 1. Including rebalancing, etc.
 
-  return 42;
+  // return 42;
 }
 
 

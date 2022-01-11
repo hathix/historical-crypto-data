@@ -214,3 +214,16 @@ export function excludeStablecoinsAndDerivatives(coinList) {
           [...STABLECOIN_REGEXES, ...DERIVATIVE_REGEXES]));
     });
 }
+
+
+/**
+  Returns the dot product of two vectors. This multiplies the corresponding
+  items at each index `i` and sums 'em up.
+    dotProduct([1,2,3],[4,5,6]) = 1*4 + 2*5 + 3*6.
+*/
+export function dotProduct(listA, listB) {
+  // Make a list of products of the `i`th elements.
+  // I'm throwing away the iteration item for readability.
+  const products = listA.map((__, i) => listA[i] * listB[i]);
+  return _.sum(products);
+}
