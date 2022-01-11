@@ -113,7 +113,7 @@ export function addWeightsToCoinList(coinData, weightFunction) {
 */
 export function mapWeightsToCoinList(coinData, weightList) {
   return addWeightsToCoinList(coinData, (coin, i) => {
-    return weghtList[i];
+    return weightList[i];
   });
 }
 
@@ -382,6 +382,8 @@ export function getAllTimestampMarkedData() {
 export function computeIndicesForEachTimestamp() {
   // Get all market data, marked with timestamps
   const allDaysData = getAllTimestampMarkedData();
+
+  console.log("Got all daily data");
 
   // For each day, compute some indices
   // We'll need to compare day's market data to the baseline, so just grab
