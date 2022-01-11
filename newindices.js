@@ -420,12 +420,13 @@ export function computeSingleIndexValue(baselineCoinData, testCoinData, generato
     return testCoin.marketCap / baselineCoin.marketCap;
   });
 
-  // Now let's just get the list of weights
+  // Now let's just get the list of weights for this day. Remember that with
+  // our refactor, the weight list should *already* be scaled to sum to one.
   const weights = testWithWeights.map(coin => coin.weight);
 
   // Now take a weighted arithmetic mean of the changes, based on weight.
   // We do a sort of dot product here.
-  const weightedAverage = dotProduct(marketCapChanges, scaledWeights);
+  const weightedAverage = dotProduct(marketCapChanges, weights);
 
   // Because we're doing so much math, the value might be off by a small
   // amount here or there. For instance, on day 1 (where the index value
