@@ -53,6 +53,9 @@ export function determineRebalanceDelta(lastRebalanceTimestamp, newRebalanceTime
   const oldBasketCoinIds = oldBasket.map(coin => coin.coinId);
   const newBasketCoinIds = newBasket.map(coin => coin.coinId);
 
+  console.log("Old basket", oldBasketCoinIds);
+  console.log("New basket", newBasketCoinIds);
+
   // Join the lists, which will give us a list of all the coins we need to
   // worry about buying or selling. This is the union of all coins in the
   // old basket, the new basket, or both.
@@ -88,4 +91,4 @@ determineRebalanceDelta(
   // For testing, suppose we want to get the top few coins using the
   // square-root strategy
   makeSquareRootGenerator(10),
-));
+);
