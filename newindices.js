@@ -271,12 +271,14 @@ export const INDEX_GENERATOR_FUNCTIONS = [
 
 /**
   Given an index generator function and a set of data of all the coins you care
-  to track, computes the value of that index.
+  to track, computes the value of that index. Please pass a generator
+  OBJECT, which contains metadata in addition to just the generator
+  function itself.
 
   Pass the set of all coins at the beginning of the sample period (the base
   amount) plus the set of coins for the day you wish you compute an index for.
 */
-export function computeSingleIndexValue(baselineCoinData, testCoinData, generator) {
+export function computeSingleIndexValue(baselineCoinData, testCoinData, generatorObject) {
   // Like stock market indices, these indices only make sense when
   // compared to some baseline. So instead of calculating some disembodied
   // index number like we used to, we're going to compare today's market
@@ -296,11 +298,12 @@ export function computeSingleIndexValue(baselineCoinData, testCoinData, generato
   // We really only care about the market caps of coin `i`, but we can
   // use the generator to get this (since it filters for just the
   // top N coins in the sample), so might as well.
-  const baselineWithWeights = generator(baselineCoinData);
+  const generatorFunction = generatorObject.generator;
+  const baselineWithWeights = generatorFunction(baselineCoinData);
 
   // And similarly let's figure out the stats of the coins in the sample.
   // THIS is where the weighting becomes important.
-  const testWithWeights = generator(testCoinData);
+  const testWithWeights = generatorFunction(testCoinData);
 
   // Now the trick is that we compute the change in market cap for the coin
   // at `i` (as a fraction, where 1 = no change, 2 = doubled, .7 = 30% down,
@@ -327,26 +330,9 @@ export function computeSingleIndexValue(baselineCoinData, testCoinData, generato
   // We do a sort of dot product here.
   const weightedAverage = dotProduct(marketCapChanges, scaledWeights);
 
-
   // I think this works??
   return weightedAverage;
 
-  // The generator's sole job is to apply weights to the coin data.
-  // That `weight` value is just appended to the data objects, basially.
-  // const coinsWithWeights = generator(coinData);
-
-  // Now
-  // OOF! we always need to compare an index against some benchmark
-  // since otherwise things like the equal-weighted index have no meaning.
-  // For equal-weighting, for instance, your weights will always sum to
-  // 1 * numCoins, since each coin has a weight of 1. So you can't just
-  // sum up the weights like I thought.
-  // So we need to get some baseline coinData from like the 1st day
-  // in the sample.
-  // Or we might need to simulate the building of the entire index from
-  // day 1. Including rebalancing, etc.
-
-  // return 42;
 }
 
 
@@ -363,3 +349,59 @@ export function computeSingleIndexValue(baselineCoinData, testCoinData, generato
 //     // Note that the index values will be hilariously
 //   });
 // }
+
+
+/**
+  Generates an object that contains coin data for each timestamp in our
+  sample. Each coin data object can be used to generate indices.
+*/
+export function getAllTimestampMarkedData() {
+  // Get some essential data to start with
+  // Get the list of all coins we've tracked
+  const extendedCoinList = getExtendedCoinList();
+  // Figure out which timestamps we've gathered data on
+  const timestamps = getAllSupportedTimestamps();
+
+  // Load market data for each timestamp
+  return timestamps.map(timestamp => {
+    // Get the data for this timestamp
+    const dataForThisDay = readDictFromCSV(`perday/${timestamp}.csv`);
+
+    // Return some data about it
+    return {
+      timestamp: timestamp,
+      readableTimestamp: makeReadableTimestamp(timestamp),
+      coinData: dataForThisDay,
+    };
+  });
+}
+
+/**
+  Runner function.
+*/
+export function computeIndicesForEachTimestamp() {
+  // Get all market data, marked with timestamps
+  const allDaysData = getAllTimestampMarkedData();
+
+  // For each day, compute some indices
+  // We'll need to compare day's market data to the baseline, so just grab
+  // that up front. This is the market data for the very first day in the
+  // sample.
+  const baselineCoinData = allDaysData[0].coinData;
+
+  // OK now loop over each day
+  allDaysData.map(dailyData => {
+    console.log(dailyData.readableTimestamp);
+
+    // Compute each index for this day
+    INDEX_GENERATOR_FUNCTIONS.map(generator => {
+      // This is for a specific index, on this specific day.
+      const indexValue = computeSingleIndexValue(
+        baselineCoinData, dailyData.coinData, generator
+      );
+      console.log(generator.name, indexValue);
+    });
+  });
+}
+
+computeIndicesForEachTimestamp();
