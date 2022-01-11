@@ -241,6 +241,54 @@ export function makeCappedIndex(coinData, n, maxWeightPerAsset) {
 }
 
 
+/**
+  Creates metadata for a generator function, with `n` being the number
+  of coins to include in a market-cap-weighted Moon & Rug index.
+*/
+export function makeMarketCapWeightedGenerator(n) {
+  // Simply fill in the template
+  return {
+    name: `moonRug${n}`,
+    size: n,
+    generator: coinData => makeMarketCapWeightedIndex(coinData, n),
+  };
+};
+
+/**
+  Like the above, but for making equal-weighted index generators.
+*/
+export function makeEqualWeightedGenerator(n) {
+  return {
+    name: `equalWeight${n}`,
+    size: n,
+    generator: coinData => makeEqualWeightedIndex(coinData, n),
+  };
+};
+
+/**
+  Like the above, but for making square-root index generators.
+*/
+export function makeSquareRootGenerator(n) {
+  return {
+    name: `squareRoot${n}`,
+    size: n,
+    generator: coinData => makeSquareRootIndex(coinData, n),
+  };
+};
+
+/**
+  Creates max-weight index generators. Note that there are two params!
+  Pass `maxWeightPercent` as a whole number (i.e. 10 => 10%)!
+*/
+export function makeCappedGenerator(n, maxWeightPercent) {
+  return {
+    name: `moonRug${n}_cap${maxWeightPercent}p`,
+    size: n,
+    generator: coinData => makeCappedIndex(coinData, n,
+      maxWeightPercent / 100),
+  };
+};
+
 
 /**
   A set of generator functions (plus metadata) for making indices.
@@ -248,59 +296,38 @@ export function makeCappedIndex(coinData, n, maxWeightPerAsset) {
   compute all kinds of indices on it.
 */
 export const INDEX_GENERATOR_FUNCTIONS = [
-  {
-    name: "moonRug50",
-    size: 50,
-    generator: coinData => makeMarketCapWeightedIndex(coinData, 50),
-  },
-  {
-    name: "moonRug100",
-    size: 100,
-    generator: coinData => makeMarketCapWeightedIndex(coinData, 100),
-  },
 
-  {
-    name: "equalWeight50",
-    size: 50,
-    generator: coinData => makeEqualWeightedIndex(coinData, 50),
-  },
-  {
-    name: "equalWeight100",
-    size: 100,
-    generator: coinData => makeEqualWeightedIndex(coinData, 100),
-  },
+  // Some Moon & Rug indices (market-cap weighted)
+  makeMarketCapWeightedGenerator(10),
+  makeMarketCapWeightedGenerator(20),
+  makeMarketCapWeightedGenerator(50),
+  makeMarketCapWeightedGenerator(100),
 
-  {
-    name: "squareRoot50",
-    size: 50,
-    generator: coinData => makeSquareRootIndex(coinData, 50),
-  },
-  {
-    name: "squareRoot100",
-    size: 100,
-    generator: coinData => makeSquareRootIndex(coinData, 100),
-  },
+  // Some equal-weighted indices
+  makeEqualWeightedGenerator(10),
+  makeEqualWeightedGenerator(20),
+  makeEqualWeightedGenerator(50),
+  makeEqualWeightedGenerator(100),
 
-  {
-    name: "moonRug50_cap10p",
-    size: 50,
-    generator: coinData => makeCappedIndex(coinData, 50, 0.1),
-  },
-  {
-    name: "moonRug50_cap20p",
-    size: 50,
-    generator: coinData => makeCappedIndex(coinData, 50, 0.2),
-  },
-  {
-    name: "moonRug100_cap10p",
-    size: 100,
-    generator: coinData => makeCappedIndex(coinData, 100, 0.1),
-  },
-  {
-    name: "moonRug100_cap20p",
-    size: 100,
-    generator: coinData => makeCappedIndex(coinData, 100, 0.2),
-  },
+  // Some square-root-weighted indices
+  makeSquareRootGenerator(10),
+  makeSquareRootGenerator(20),
+  makeSquareRootGenerator(50),
+  makeSquareRootGenerator(100),
+
+  // Some capped funds
+  makeCappedGenerator(10, 5),
+  makeCappedGenerator(10, 10),
+  makeCappedGenerator(10, 20),
+  makeCappedGenerator(20, 5),
+  makeCappedGenerator(20, 10),
+  makeCappedGenerator(20, 20),
+  makeCappedGenerator(50, 5),
+  makeCappedGenerator(50, 10),
+  makeCappedGenerator(50, 20),
+  makeCappedGenerator(100, 5),
+  makeCappedGenerator(100, 10),
+  makeCappedGenerator(100, 20),
 ];
 
 
@@ -434,11 +461,11 @@ export function computeIndicesForEachTimestamp() {
 
   // OK now loop over each day. Get a dict with timestamp and index info
   // for each day
-  const dailyDicts = allDaysData.slice(0,10).map(dailyData => {
+  const dailyDicts = allDaysData.map(dailyData => {
     // console.log(dailyData.readableTimestamp);
 
     // Compute each index for this day
-    return INDEX_GENERATOR_FUNCTIONS.map(generator => {
+    let indices = INDEX_GENERATOR_FUNCTIONS.map(generator => {
       // This is for a specific index, on this specific day.
       const indexValue = computeSingleIndexValue(
         baselineCoinData, dailyData.coinData, generator
@@ -469,6 +496,8 @@ export function computeIndicesForEachTimestamp() {
     // Now we can return this
     return resultDict;
   });
+
+  console.log(dailyDicts);
 
   // We now have an array of dicts, one per day. We can now write this!!
   writeDictToCsv(dailyDicts, `newresults/allindices.csv`);
