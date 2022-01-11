@@ -255,8 +255,9 @@ export function analyzeRebalancingSchedule(rebalanceIntervalDays, generator) {
   return rebalancings;
 }
 
-const res = analyzeRebalancingSchedule(180, makeSquareRootGenerator(5));
-console.log(res);
+const res = analyzeRebalancingSchedule(30, makeSquareRootGenerator(5));
+console.log("Rebalancings", res);
+console.log("Last rebalance", res[res.length-1]);
 
 //
 // const availableTimestamps = getAllSupportedTimestamps();
