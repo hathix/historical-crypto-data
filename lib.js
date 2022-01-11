@@ -257,3 +257,18 @@ export function toNDecimalPlaces(number, numDecimalPlaces) {
   const adjuster = Math.pow(10, numDecimalPlaces);
   return Math.round(number * adjuster) / adjuster;
 }
+
+/**
+  Gets the first item in the given list that matches the predicate. Useful
+  if you want to, for instance, look up an item given its id.
+  If nothing matches, returns undefined.
+*/
+export function getFirstItemWhere(list, predicate) {
+  const matches = list.filter((item, i) => predicate(item, i));
+  if (matches.length === 0) {
+    return undefined;
+  }
+  else {
+    return matches[0];
+  };
+}

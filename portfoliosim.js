@@ -1,4 +1,4 @@
-import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct, scaleToSumToOne, toNDecimalPlaces } from "./lib.js";
+import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct, scaleToSumToOne, toNDecimalPlaces, getFirstItemWhere } from "./lib.js";
 import { getTopCoinsOnDayMultipleNs, MOON_AND_RUG_DIVISOR, MOON_AND_RUG_SIZES } from "./buyallvsindex.js";
 import { makeMarketCapWeightedIndex, makeSquareRootGenerator, makeEqualWeightedGenerator, makeCappedGenerator, INDEX_GENERATOR_FUNCTIONS } from "./newindices.js";
 
@@ -53,8 +53,8 @@ export function determineRebalanceDelta(lastRebalanceTimestamp, newRebalanceTime
   const oldBasketCoinIds = oldBasket.map(coin => coin.coinId);
   const newBasketCoinIds = newBasket.map(coin => coin.coinId);
 
-  console.log("Old basket", oldBasketCoinIds);
-  console.log("New basket", newBasketCoinIds);
+  // console.log("Old basket", oldBasketCoinIds);
+  // console.log("New basket", newBasketCoinIds);
 
   // Join the lists, which will give us a list of all the coins we need to
   // worry about buying or selling. This is the union of all coins in the
@@ -65,21 +65,107 @@ export function determineRebalanceDelta(lastRebalanceTimestamp, newRebalanceTime
   // their IDs). First, some convenience functions...
   const isInOldBasket = (id) => _.indexOf(oldBasketCoinIds, id) !== -1;
   const isInNewBasket = (id) => _.indexOf(newBasketCoinIds, id) !== -1;
+  //
+  // const coinIdsStillInBasket = allCoinIds.filter(id => {
+  //   return isInOldBasket(id) && isInNewBasket(id);
+  // });
+  // const coinIdsInNewButNotOld = allCoinIds.filter(id => {
+  //   return !(isInOldBasket(id)) && isInNewBasket(id);
+  // });
+  // const coinIdsInOldButNotNew = allCoinIds.filter(id => {
+  //   return isInOldBasket(id) && !(isInNewBasket(id));
+  // });
+  //
+  // // Now we can do different logic for each
+  // console.log("In old and new baskets", coinIdsStillInBasket);
+  // console.log("New addition", coinIdsInNewButNotOld);
+  // console.log("Outta here", coinIdsInOldButNotNew);
 
-  const coinIdsStillInBasket = allCoinIds.filter(id => {
-    return isInOldBasket(id) && isInNewBasket(id);
-  });
-  const coinIdsInNewButNotOld = allCoinIds.filter(id => {
-    return !(isInOldBasket(id)) && isInNewBasket(id);
-  });
-  const coinIdsInOldButNotNew = allCoinIds.filter(id => {
-    return isInOldBasket(id) && !(isInNewBasket(id));
+  // Let's make a list of purchase and sell orders that we'll need
+  // to execute.
+  // The only distinction we still need to tease out is which of the
+  // returning coins have gone up in weighting vs. down (in which case
+  // we'll have to buy more or sell some off, respectively).
+  // const coinIdsThatGainedWeight = coinIdsStillInBasket.filter(id => {
+  //   // OK, we know this coin ID was in the basket before and after.
+  //   // Let's get its original and new weight.
+  //   const oldWeight = getFirstItemWhere(
+  //     oldBasket, coin => coin.coinId === id).weight;
+  //   const newWeight = getFirstItemWhere(
+  //     newBasket, coin => coin.coinId === id).weight;
+  //
+  //   console.log("Delta", id, newWeight - oldWeight);
+  //
+  //   // Now just return anything where the new weight is greater
+  //   return newWeight >= oldWeight;
+  // });
+  // // The list of coins that LOST weight is just the complement; that's easy
+  // // This is the `\` operator in set theory -- take the union and subtract
+  // // the one set (since we know the sets are disjoint).
+  // // The best way to do this in Lodash is with `xor`
+  // const coinIdsThatLostWeight = _.xor(
+  //   coinIdsStillInBasket, coinIdsThatGainedWeight);
+  //
+  // console.log("Gained weight", coinIdsThatGainedWeight);
+  // console.log("Lost weight", coinIdsThatLostWeight);
+
+
+  // Go through each coin in our list and see if it needs to be bought
+  // (if it's new here or if its weighting went up) or sold (if it's fallen out
+  // of the index or its weighting went down).
+  const buyAndSellOrders = allCoinIds.map(id => {
+    // Let's figure out how much to buy or sell first before we construct a
+    // return object.
+    // We'll use the convention that positive means we should buy, negative
+    // means we should sell. The value is just the delta in weighting... we'll
+    // figure out exactly how many coins to buy or sell separately.
+    // let buyAmount;
+
+    // The simplest logic is to figure out the old and new weighting. If
+    // something was not in the old basket, its weight was zero; if it's not in
+    // the new basket, its weight is zero.
+    const oldCoinData = getFirstItemWhere(oldBasket, c => c.coinId === id);
+    const newCoinData = getFirstItemWhere(newBasket, c => c.coinId === id);
+    // Now we can get the weights, which are 0 if an item is undefined
+    // (not found).
+    const oldWeight = oldCoinData ? oldCoinData.weight : 0;
+    const newWeight = newCoinData ? newCoinData.weight : 0;
+
+    // Now the buy amount is just the delta here. The actual dollar amount
+    // is (the amount in your portfolio) times this, since this says
+    // "you need to spend X% of your portfolio buying or selling this".
+    const buyAmount = newWeight - oldWeight;
+
+    // Another convenient piece of info to have is the change in your
+    // position. If you need to sell it all, that'll be -1. If you need to
+    // buy from zero, that's infinity, so call it null.
+    // Multiply this by 100 to get the percent change, which is just easier
+    // for humans to read.
+    const percentChangeInPosition = oldWeight === 0 ? null :
+      buyAmount / oldWeight * 100;
+
+    return {
+      // These are the key pieces of info
+      coinId: id,
+      buyAmount: buyAmount,
+
+      // This is nice to provide for future use
+      oldWeight: oldWeight,
+      newWeight: newWeight,
+      percentChangeInPosition: percentChangeInPosition,
+    };
+
+
+    // // First, if it's in the new basket but not the old, we know we need
+    // // to buy ALL of it.
+    // if (!(isInOldBasket(id))) {
+    //   // It's new here, so we need to buy the WHOLE thing.
+    //   const newCoin
+    //   buyAmount =
+    // }
   });
 
-  // Now we can do different logic for each
-  console.log("In old and new baskets", coinIdsStillInBasket);
-  console.log("New addition", coinIdsInNewButNotOld);
-  console.log("Outta here", coinIdsInOldButNotNew);
+  console.log("Buy or sell by weight", buyAndSellOrders);
 }
 
 const availableTimestamps = getAllSupportedTimestamps();
