@@ -539,4 +539,4 @@ export function computeIndicesForEachTimestamp() {
   writeDictToCsv(dailyDicts, `newresults/allindices.csv`);
 }
 
-computeIndicesForEachTimestamp();
+// computeIndicesForEachTimestamp();
