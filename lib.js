@@ -227,3 +227,16 @@ export function dotProduct(listA, listB) {
   const products = listA.map((__, i) => listA[i] * listB[i]);
   return _.sum(products);
 }
+
+/**
+  Given a list of numbers, scales them all up or down such that the whole
+  list sums to 1, while preserving the relationships between numbers
+  (i.e. if A is twice as large as B, it will remain that way). Useful as a
+  way or normalizing lists whose numbers are of wildly variable orders
+  of magnitude.
+*/
+export function scaleToSumToOne(nums) {
+  // Just divide everything by the sum
+  const sum = _.sum(nums);
+  return nums.map(n => n / sum);
+}

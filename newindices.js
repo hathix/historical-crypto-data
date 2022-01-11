@@ -1,4 +1,4 @@
-import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct } from "./lib.js";
+import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct, scaleToSumToOne } from "./lib.js";
 import { calcMarketDataOn } from "./calcindex.js";
 import { getTopCoinsOnDayMultipleNs, MOON_AND_RUG_DIVISOR, MOON_AND_RUG_SIZES } from "./buyallvsindex.js";
 
@@ -317,9 +317,15 @@ export function computeSingleIndexValue(baselineCoinData, testCoinData, generato
   // Now let's just get the list of weights
   const weights = testWithWeights.map(coin => coin.weight);
 
+  // Each generator might yield weights of hilariously different orders of
+  // magnitude, with some being like 1 billion and others being like 1.
+  // To make things more standardized, we can normalize the list of weights
+  // so that they all add to 1
+  const scaledWeights = scaleToSumToOne(weights);
+
   // Now take a weighted arithmetic mean of the changes, based on weight.
   // We do a sort of dot product here.
-  const weightedAverage = dotProduct(marketCapChanges, weights);
+  const weightedAverage = dotProduct(marketCapChanges, scaledWeights);
 
 
   // I think this works??
