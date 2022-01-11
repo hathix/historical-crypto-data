@@ -1,4 +1,4 @@
-import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct, scaleToSumToOne } from "./lib.js";
+import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct, scaleToSumToOne, toNDecimalPlaces } from "./lib.js";
 import { calcMarketDataOn } from "./calcindex.js";
 import { getTopCoinsOnDayMultipleNs, MOON_AND_RUG_DIVISOR, MOON_AND_RUG_SIZES } from "./buyallvsindex.js";
 
@@ -330,8 +330,14 @@ export function computeSingleIndexValue(baselineCoinData, testCoinData, generato
   // We do a sort of dot product here.
   const weightedAverage = dotProduct(marketCapChanges, scaledWeights);
 
-  // I think this works??
-  return weightedAverage;
+  // Because we're doing so much math, the value might be off by a small
+  // amount here or there. For instance, on day 1 (where the index value
+  // should always be 1.000.... by definition), we sometimes get 0.999...8
+  // or 1.000..4. That usually happens around 15 sigdigs.
+  // So let's cut this down to a more reasonable 4-8 sigdigs to avoid
+  // this inelegant "fuzzing" at the end of the value.
+  const fewerSigDigs = toNDecimalPlaces(weightedAverage, 8);
+  return fewerSigDigs;
 
 }
 
@@ -392,7 +398,7 @@ export function computeIndicesForEachTimestamp() {
   const baselineCoinData = allDaysData[0].coinData;
 
   // OK now loop over each day
-  allDaysData.slice(0,10).map(dailyData => {
+  allDaysData.map(dailyData => {
     console.log(dailyData.readableTimestamp);
 
     // Compute each index for this day

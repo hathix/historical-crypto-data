@@ -240,3 +240,19 @@ export function scaleToSumToOne(nums) {
   const sum = _.sum(nums);
   return nums.map(n => n / sum);
 }
+
+
+/**
+  Rounds a given floating-point number to N decimal places.
+    toNDecimalPlaces(1.234567, 3) => 1.235
+    toNDecimalPlaces(1.234567, 5) => 1.23457
+*/
+export function toNDecimalPlaces(number, numDecimalPlaces) {
+  // JS only natively lets you round to the nearest whole number, so
+  // we can just multiply this by 10^N (and then divide by that amount after
+  // rounding) so we get to take advantage of that native function. We're
+  // basically temporarily moving to the world of whole numbers before going
+  // back to the floating-point number.
+  const adjuster = Math.pow(10, numDecimalPlaces);
+  return Math.round(number * adjuster) / adjuster;
+}
