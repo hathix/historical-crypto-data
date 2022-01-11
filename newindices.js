@@ -284,6 +284,8 @@ export function makeCappedGenerator(n, maxWeightPercent) {
   return {
     name: `moonRug${n}_cap${maxWeightPercent}p`,
     size: n,
+    // Note that the generator function requires a fraction (between 0 and 1),
+    // so we have to cut the
     generator: coinData => makeCappedIndex(coinData, n,
       maxWeightPercent / 100),
   };
@@ -315,11 +317,21 @@ export const INDEX_GENERATOR_FUNCTIONS = [
   makeSquareRootGenerator(50),
   makeSquareRootGenerator(100),
 
-  // Some capped funds
-  makeCappedGenerator(10, 5),
-  makeCappedGenerator(10, 10),
+  // Some capped funds. Note that the number of assets in the fund
+  // and the max weight of each asset must multiply to at least 100...
+  // otherwise, you'd never be able to fill up 100% of the index!
+  // e.g. this one below would give all 10 assets 5% of the index each...
+  // which lets us only fill up half the index.
+  // makeCappedGenerator(10, 5),
+  // The ones that multiply to exactly 100 are also a bit nonsensical, since
+  // they're just clones of equal-weighted funds because everything gets
+  // the same percent. On my experiments this does indeed work out --
+  // e.g. the 10/10 capped index is the same as the 10 equal-weighted index,
+  // and the 20/5 capped index is the same as the 20 equal-weighted index.
+  // So that's cool.
+  // makeCappedGenerator(10, 10),
   makeCappedGenerator(10, 20),
-  makeCappedGenerator(20, 5),
+  // makeCappedGenerator(20, 5),
   makeCappedGenerator(20, 10),
   makeCappedGenerator(20, 20),
   makeCappedGenerator(50, 5),
