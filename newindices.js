@@ -87,21 +87,12 @@ export function getTopNCoinsByMarketCap(coinData, n) {
   - i (index of iteration)
 */
 export function addWeightsToCoinList(coinData, weightFunction) {
-  return coinData.map((coin, i) => {
-      return {
-      // Carry over all previous fields from the coin data. Namely:
-      // timestamp,readableTimestamp,coinId,price,marketCap,totalVolume
-      timestamp: coin.timestamp,
-      readableTimestamp: coin.readableTimestamp,
-      coinId: coin.coinId,
-      price: coin.price,
-      marketCap: coin.marketCap,
-      totalVolume: coin.totalVolume,
-
-      // Add a new field. The weighting is determined by the function.
-      weight: weightFunction(coin, i),
-    };
-  });
+  // Let's simply generate a list of weights from the weight function,
+  // then map those onto the list of coins.
+  // Don't worry about normalizing weights here; we'll take care of that
+  // in the main function.
+  const weights = coinData.map((coin, i) => weightFunction(coin, i));
+  return mapWeightsToCoinList(coinData, weights);
 }
 
 /**
@@ -112,9 +103,36 @@ export function addWeightsToCoinList(coinData, weightFunction) {
   the 1st to the 1st, etc.
 */
 export function mapWeightsToCoinList(coinData, weightList) {
-  return addWeightsToCoinList(coinData, (coin, i) => {
-    return weightList[i];
+  // NEW: we will actually apply the weightings here, rather than
+  // using the mapping function.
+
+  // Before we do anything else, we should scale down all the weights, since
+  // different generation strategies may yield weights of hilariously different
+  // orders of magnitude, with some being like 1 billion and others being like
+  // 1. To make things more standardized, we can normalize the list of weights
+  // so that they all add to 1
+  const scaledWeights = scaleToSumToOne(weightList);
+
+  // Now we can simply map each scaled weight onto the list.
+  return coinData.map((coin, i) => {
+    return {
+      // Carry over all previous fields from the coin data. Namely:
+      // timestamp,readableTimestamp,coinId,price,marketCap,totalVolume
+      timestamp: coin.timestamp,
+      readableTimestamp: coin.readableTimestamp,
+      coinId: coin.coinId,
+      price: coin.price,
+      marketCap: coin.marketCap,
+      totalVolume: coin.totalVolume,
+
+      // Add a new field. The weighting comes from the list.
+      weight: scaledWeights[i],
+    };
   });
+
+  // return addWeightsToCoinList(coinData, (coin, i) => {
+  //   return weightList[i];
+  // });
 }
 
 
@@ -393,12 +411,6 @@ export function computeSingleIndexValue(baselineCoinData, testCoinData, generato
 
   // Now let's just get the list of weights
   const weights = testWithWeights.map(coin => coin.weight);
-
-  // Each generator might yield weights of hilariously different orders of
-  // magnitude, with some being like 1 billion and others being like 1.
-  // To make things more standardized, we can normalize the list of weights
-  // so that they all add to 1
-  const scaledWeights = scaleToSumToOne(weights);
 
   // Now take a weighted arithmetic mean of the changes, based on weight.
   // We do a sort of dot product here.
