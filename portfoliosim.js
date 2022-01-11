@@ -167,7 +167,7 @@ export function determineRebalanceDelta(lastRebalanceTimestamp, newRebalanceTime
     // }
   });
 
-  console.log("Buy or sell by weight", buyAndSellOrders);
+  // console.log("Buy or sell by weight", buyAndSellOrders);
 
   return buyAndSellOrders;
 }
@@ -193,9 +193,70 @@ export function analyzeRebalancingSchedule(rebalanceIntervalDays, generator) {
   //
   // console.log("Rebalance on", timestampsToRebalanceOn.map(
   //   t => makeReadableTimestamp(t)));
+
+  // If there are `n` timestamps to rebalance on, there will be `n`
+  // rebalancings. Each one will be based on the prior one... except the first,
+  // which will be based on the baseline (day 0).
+
+  // The code is cleaner if we include day 0 as a "rebalancing" date but
+  // start rebalancing with index 1.
+  // const timestampsToRebalanceOnPlusZero = [0, ...timestampsToRebalanceOn];
+
+  const rebalancings = timestampsToRebalanceOn.map((thisTimestamp, i) => {
+    // Figure out the previous basket we will compare against. This is
+    // the `i-1`th basket, or the baseline if `i=0`.
+    const lastRebalanceTimestamp = i === 0 ? availableTimestamps[0]
+      : timestampsToRebalanceOn[i-1];
+
+    // Now we can compute how rebalancing would go
+    const buyAndSellOrders = determineRebalanceDelta(lastRebalanceTimestamp,
+      thisTimestamp, generator);
+
+    // The amount of money bought should be equal to the amount sold (but
+    // with the sign flipped). Just check this...
+    // EDIT: yes, this is true, just checked. No need to run the code.
+    // To get amount bought, just zero out the sales and sum it all up
+    // const amountBought = _.sum(
+    //   buyAndSellOrders.map(order => Math.max(0, order.weightIncrease)));
+    // // The reverse applies to sales
+    // const amountSold = _.sum(
+    //   buyAndSellOrders.map(order => Math.min(0, order.weightIncrease)));
+    //
+    // console.log("Bought", amountBought);
+    // console.log("Sold", amountSold);
+
+    // Another interesting question we may ask of this dataset is, what's the
+    // net "churn"? This is the total amount of coins that we'd have to buy
+    // and sell to implement this rebalancing. This is relevant since we
+    // usually pay fees proportional to the churn.
+    // Buying and selling count equally, so use the absolute-value function
+    const churn = _.sum(
+      buyAndSellOrders.map(order => Math.abs(order.weightIncrease)));
+
+    // Now we can return data about it
+    return {
+      // Metadata
+      timestamp: thisTimestamp,
+      readableTimestamp: makeReadableTimestamp(thisTimestamp),
+      rebalancingNumber: i,
+
+      // Now, payload
+      // This is an array of dicts containing data on what you're buying
+      // and selling
+      buyAndSellOrders: buyAndSellOrders,
+      // This is the amount of churn we'd run into -- the total amount of money
+      // (relative to our portfolio size) that we'd be buying or selling.
+      // Buy amount should be equal to sell amount.
+      churn: churn,
+    };
+  });
+
+  // Each rebalancing will have a lot of data about what you'd buy and sell.
+  return rebalancings;
 }
 
-analyzeRebalancingSchedule(7, makeSquareRootGenerator(50));
+const res = analyzeRebalancingSchedule(180, makeSquareRootGenerator(5));
+console.log(res);
 
 //
 // const availableTimestamps = getAllSupportedTimestamps();
