@@ -245,25 +245,40 @@ export function makeCappedIndex(coinData, n, maxWeightPerAsset) {
   The idea is that, if you feed in a set of coin data, we can
   compute all kinds of indices on it.
 */
-export const indexGeneratorFunctions = [
+export const INDEX_GENERATOR_FUNCTIONS = [
   {
-    name: "moon_rug_50",
+    name: "moonRug50",
     size: 50,
     generator: coinData => makeMarketCapWeightedIndex(coinData, 50),
   },
   {
-    name: "equal_weight_50",
+    name: "equalWeight50",
     size: 50,
     generator: coinData => makeEqualWeightedIndex(coinData, 50),
   },
   {
-    name: "square_root_50",
+    name: "squareRoot50",
     size: 50,
     generator: coinData => makeSquareRootIndex(coinData, 50),
   },
   {
-    name: "mr_50_cap_10",
+    name: "moonRug50_cap10%",
     size: 50,
     generator: coinData => makeCappedIndex(coinData, 50, 0.1),
   },
 ];
+
+
+/**
+  Returns an array of index values (basically the weighted sum of all the
+  coins in the sample, according to various weighting strategies) for the
+  given set of coins -- which you could load from ther `perday` folder or
+  something.
+*/
+// export function calculateIndices(coinData) {
+//   return INDEX_GENERATOR_FUNCTIONS.map((metadata, i) => {
+//     // We're going to return some old data like the name and size, plus
+//     // obviously the index value.
+//     // Note that the index values will be hilariously
+//   });
+// }
