@@ -1,6 +1,6 @@
 import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv, getAllSupportedTimestamps, makeReadableTimestamp, getMarketDataOn, readDictFromCSV, getExtendedCoinList, excludeStablecoinsAndDerivatives, dotProduct, scaleToSumToOne, toNDecimalPlaces, getFirstItemWhere } from "./lib.js";
 import { getTopCoinsOnDayMultipleNs, MOON_AND_RUG_DIVISOR, MOON_AND_RUG_SIZES } from "./buyallvsindex.js";
-import { makeMarketCapWeightedIndex, makeSquareRootGenerator, makeEqualWeightedGenerator, makeCappedGenerator, INDEX_GENERATOR_FUNCTIONS } from "./newindices.js";
+import { makeMarketCapWeightedGenerator, makeSquareRootGenerator, makeEqualWeightedGenerator, makeCappedGenerator, INDEX_GENERATOR_FUNCTIONS } from "./newindices.js";
 
 import _ from "lodash";
 
@@ -140,19 +140,21 @@ export function determineRebalanceDelta(lastRebalanceTimestamp, newRebalanceTime
     // position. If you need to sell it all, that'll be -1. If you need to
     // buy from zero, that's infinity, so call it null.
     // Multiply this by 100 to get the percent change, which is just easier
-    // for humans to read.
-    const percentChangeInPosition = oldWeight === 0 ? null :
+    // for humans to read. -100 means sell all; 0 means no change; 200 means
+    // it's tripled.
+    const percentIncreaseInPosition = oldWeight === 0 ? null :
       buyAmount / oldWeight * 100;
 
     return {
       // These are the key pieces of info
       coinId: id,
-      buyAmount: buyAmount,
+      // Hm try renaming this
+      weightIncrease: buyAmount,
 
       // This is nice to provide for future use
       oldWeight: oldWeight,
       newWeight: newWeight,
-      percentChangeInPosition: percentChangeInPosition,
+      percentIncreaseInPosition: percentIncreaseInPosition,
     };
 
 
@@ -166,15 +168,30 @@ export function determineRebalanceDelta(lastRebalanceTimestamp, newRebalanceTime
   });
 
   console.log("Buy or sell by weight", buyAndSellOrders);
+
+  return buyAndSellOrders;
 }
 
 const availableTimestamps = getAllSupportedTimestamps();
-determineRebalanceDelta(
+const result = determineRebalanceDelta(
   // From oldest...
   availableTimestamps[0],
   // To newest...
   availableTimestamps[availableTimestamps.length - 1],
   // For testing, suppose we want to get the top few coins using the
-  // square-root strategy
-  makeSquareRootGenerator(10),
+  // square-root strategy.
+  // I tested it with an equal-weighted generator and it worked too!
+  // In that case, it always returns a 0% change (stayed in index),
+  // -100% change (left index), or `null` change (joined index).
+  // It works with a market-cap-weighted generator too; it has pretty
+  // aggressive rebalancing since a coin could easily gain or lose
+  // a ton of its weight.
+  // makeSquareRootGenerator(10),
+  // makeMarketCapWeightedGenerator(100),
+  // makeEqualWeightedGenerator(100),
+  makeCappedGenerator(20, 10),
 );
+
+console.log("Old weights", _.sum(result.map(c => c.oldWeight)));
+console.log("New weights", _.sum(result.map(c => c.newWeight)));
+console.log("Churn", _.sum(result.map(c => Math.abs(c.weightIncrease))));
