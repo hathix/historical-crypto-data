@@ -392,7 +392,7 @@ export function computeIndicesForEachTimestamp() {
   const baselineCoinData = allDaysData[0].coinData;
 
   // OK now loop over each day
-  allDaysData.map(dailyData => {
+  allDaysData.slice(0,10).map(dailyData => {
     console.log(dailyData.readableTimestamp);
 
     // Compute each index for this day
