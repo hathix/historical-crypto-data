@@ -58,12 +58,23 @@ import _ from "lodash";
 
 /**
   Returns a clone of the given coinData list that is sorted by
-  market cap descending.
+  market cap descending. We also will remove blanks and stablecoins/derivatives
+  as a bonus.
 */
 export function getSortedCoinList(coinData) {
-  // As usual, multiply market cap by -1 so we can get a descending
-  // list. Note that _.sortBy doesn't sort in place which is nice.
-  return _.sortBy(coinData, coin => coin.marketCap * -1);
+  // Given some raw data, we need to clean it up a bit first.
+  // Cut out the empty objects: these ones lack fields like
+  // coin ID.
+  const nonEmptyData = coinData.filter(record => record.coinId);
+
+  // Sort this list of coins by market cap descending (hence the -1).
+  const sortedData = _.sortBy(
+    nonEmptyData, coin => coin.marketCap * -1);
+
+  // Exclude the stablecoins and derivatives
+  const cleanedData = excludeStablecoinsAndDerivatives(sortedData);
+
+  return cleanedData;
 }
 
 /**
