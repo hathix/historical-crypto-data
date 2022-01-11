@@ -249,16 +249,21 @@ export const indexGeneratorFunctions = [
   {
     name: "moon_rug_50",
     size: 50,
-    generator: coinData => makeMarketCapWeightedIndex(50),
+    generator: coinData => makeMarketCapWeightedIndex(coinData, 50),
   },
   {
     name: "equal_weight_50",
     size: 50,
-    generator: coinData => makeEqualWeightedIndex(50),
+    generator: coinData => makeEqualWeightedIndex(coinData, 50),
   },
   {
     name: "square_root_50",
     size: 50,
-    generator: coinData => makeSquareRootIndex(50),
+    generator: coinData => makeSquareRootIndex(coinData, 50),
+  },
+  {
+    name: "mr_50_cap_10",
+    size: 50,
+    generator: coinData => makeCappedIndex(coinData, 50, 0.1),
   },
 ];
