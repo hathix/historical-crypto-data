@@ -255,9 +255,50 @@ export function analyzeRebalancingSchedule(rebalanceIntervalDays, generator) {
   return rebalancings;
 }
 
-const res = analyzeRebalancingSchedule(30, makeSquareRootGenerator(5));
-console.log("Rebalancings", res);
-console.log("Last rebalance", res[res.length-1]);
+
+/**
+  Compares churn (total amount transacted during rebalances)
+  for multiple values of:
+
+  - The frequency of rebalancing, in days
+  - The size of the index
+
+  Given a certain generator function. Here, pass a unary function like
+  `makeSquareRootGenerator` (don't invoke it! we're going to invoke it!)
+*/
+export function compareChurnByRebalancingStrategy(generatorFn) {
+  // Try a bunch of different rebalancing frequences
+  const rebalancingFrequencies = [1, 7, 14, 30, 91, 182, 364];
+  // And try a bunch of different index sizes
+  const indexSizes = [5, 10, 20, 50, 100];
+
+  // Now go through the cross product of each of these and compute churn
+  // for each combination
+  // The cleanest way to do this is imperatively
+  let rebalancingResults = [];
+  rebalancingFrequencies.forEach(frequency => {
+    indexSizes.forEach(indexSize => {
+      // We now have enough informatoin to compute the rebalancing
+      // results
+      const results = analyzeRebalancingSchedule(
+        frequency,
+        generatorFn(indexSize),
+      );
+      // Plug these results in
+      // rebalancingResults.push(result);
+
+      console.log(`f:${frequency} x i${indexSize}`, _.sumBy(results, r => r.churn));
+    });
+  });
+
+  // Now let's go through each of the results and
+}
+
+// const res = analyzeRebalancingSchedule(7, makeSquareRootGenerator(20));
+// console.log("Rebalancings", res);
+// // console.log("Last rebalance", res[res.length-1]);
+// const totalChurn = _.sumBy(res, r => r.churn);
+// console.log("Total churn", totalChurn);
 
 //
 // const availableTimestamps = getAllSupportedTimestamps();
