@@ -118,6 +118,7 @@ export function dateToTimestamp(dateString) {
 /**
   Asynchronously writes the given dict to a given CSV file. You do not
   need to provide the `dirname`; we'll take care of that.
+  (Well, this is properly an array of dicts...)
   e.g. pass:
     writeDictToCsv(myDict, "data/hello.csv")
 */

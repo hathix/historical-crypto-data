@@ -234,6 +234,8 @@ export function makeCappedIndex(coinData, n, maxWeightPerAsset) {
     fractionOfMarketLeft -= percentOfMarket;
   }
 
+  // console.log(actualWeights);
+
   // Now we can apply the weights to the coin data
   return mapWeightsToCoinList(topNCoins, actualWeights);
 }
@@ -252,19 +254,52 @@ export const INDEX_GENERATOR_FUNCTIONS = [
     generator: coinData => makeMarketCapWeightedIndex(coinData, 50),
   },
   {
+    name: "moonRug100",
+    size: 100,
+    generator: coinData => makeMarketCapWeightedIndex(coinData, 100),
+  },
+
+  {
     name: "equalWeight50",
     size: 50,
     generator: coinData => makeEqualWeightedIndex(coinData, 50),
   },
+  {
+    name: "equalWeight100",
+    size: 100,
+    generator: coinData => makeEqualWeightedIndex(coinData, 100),
+  },
+
   {
     name: "squareRoot50",
     size: 50,
     generator: coinData => makeSquareRootIndex(coinData, 50),
   },
   {
-    name: "moonRug50_cap10%",
+    name: "squareRoot100",
+    size: 100,
+    generator: coinData => makeSquareRootIndex(coinData, 100),
+  },
+
+  {
+    name: "moonRug50_cap10p",
     size: 50,
     generator: coinData => makeCappedIndex(coinData, 50, 0.1),
+  },
+  {
+    name: "moonRug50_cap20p",
+    size: 50,
+    generator: coinData => makeCappedIndex(coinData, 50, 0.2),
+  },
+  {
+    name: "moonRug100_cap10p",
+    size: 100,
+    generator: coinData => makeCappedIndex(coinData, 100, 0.1),
+  },
+  {
+    name: "moonRug100_cap20p",
+    size: 100,
+    generator: coinData => makeCappedIndex(coinData, 100, 0.2),
   },
 ];
 
@@ -397,19 +432,46 @@ export function computeIndicesForEachTimestamp() {
   // sample.
   const baselineCoinData = allDaysData[0].coinData;
 
-  // OK now loop over each day
-  allDaysData.map(dailyData => {
-    console.log(dailyData.readableTimestamp);
+  // OK now loop over each day. Get a dict with timestamp and index info
+  // for each day
+  const dailyDicts = allDaysData.slice(0,10).map(dailyData => {
+    // console.log(dailyData.readableTimestamp);
 
     // Compute each index for this day
-    INDEX_GENERATOR_FUNCTIONS.map(generator => {
+    return INDEX_GENERATOR_FUNCTIONS.map(generator => {
       // This is for a specific index, on this specific day.
       const indexValue = computeSingleIndexValue(
         baselineCoinData, dailyData.coinData, generator
       );
-      console.log(generator.name, indexValue);
+
+      // Give back a simple mapping between generator names and values;
+      // we will use this to construct a single dict later
+      return {
+        generatorName: generator.name,
+        indexValue: indexValue,
+      };
+
+      // return indexValue;
+      // console.log(generator.name, indexValue);
     });
+
+    // Now construct a dict that includes all of the indices. Start with
+    // the basic scalar values, then tack on the indices.
+    let resultDict = {
+      timestamp: dailyData.timestamp,
+      readableTimestamp: dailyData.readableTimestamp,
+    };
+
+    indices.forEach(index => {
+      resultDict[index.generatorName] = index.indexValue;
+    });
+
+    // Now we can return this
+    return resultDict;
   });
+
+  // We now have an array of dicts, one per day. We can now write this!!
+  writeDictToCsv(dailyDicts, `newresults/allindices.csv`);
 }
 
 computeIndicesForEachTimestamp();
