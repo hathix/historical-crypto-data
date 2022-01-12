@@ -46,7 +46,6 @@ export function determineRebalanceDelta(lastRebalanceTimestamp, newRebalanceTime
   //   buy a bunch of it
   // - In old but not new, meaning it's fallen out of the index and we need to
   //   sell off all of it
-  // We'll call these Category 1, 2, and 3.
 
   // Let's partition the coins into each category first.
   // Get the IDs of the coins, then we can do some looking up
@@ -65,50 +64,6 @@ export function determineRebalanceDelta(lastRebalanceTimestamp, newRebalanceTime
   // their IDs). First, some convenience functions...
   const isInOldBasket = (id) => _.indexOf(oldBasketCoinIds, id) !== -1;
   const isInNewBasket = (id) => _.indexOf(newBasketCoinIds, id) !== -1;
-  //
-  // const coinIdsStillInBasket = allCoinIds.filter(id => {
-  //   return isInOldBasket(id) && isInNewBasket(id);
-  // });
-  // const coinIdsInNewButNotOld = allCoinIds.filter(id => {
-  //   return !(isInOldBasket(id)) && isInNewBasket(id);
-  // });
-  // const coinIdsInOldButNotNew = allCoinIds.filter(id => {
-  //   return isInOldBasket(id) && !(isInNewBasket(id));
-  // });
-  //
-  // // Now we can do different logic for each
-  // console.log("In old and new baskets", coinIdsStillInBasket);
-  // console.log("New addition", coinIdsInNewButNotOld);
-  // console.log("Outta here", coinIdsInOldButNotNew);
-
-  // Let's make a list of purchase and sell orders that we'll need
-  // to execute.
-  // The only distinction we still need to tease out is which of the
-  // returning coins have gone up in weighting vs. down (in which case
-  // we'll have to buy more or sell some off, respectively).
-  // const coinIdsThatGainedWeight = coinIdsStillInBasket.filter(id => {
-  //   // OK, we know this coin ID was in the basket before and after.
-  //   // Let's get its original and new weight.
-  //   const oldWeight = getFirstItemWhere(
-  //     oldBasket, coin => coin.coinId === id).weight;
-  //   const newWeight = getFirstItemWhere(
-  //     newBasket, coin => coin.coinId === id).weight;
-  //
-  //   console.log("Delta", id, newWeight - oldWeight);
-  //
-  //   // Now just return anything where the new weight is greater
-  //   return newWeight >= oldWeight;
-  // });
-  // // The list of coins that LOST weight is just the complement; that's easy
-  // // This is the `\` operator in set theory -- take the union and subtract
-  // // the one set (since we know the sets are disjoint).
-  // // The best way to do this in Lodash is with `xor`
-  // const coinIdsThatLostWeight = _.xor(
-  //   coinIdsStillInBasket, coinIdsThatGainedWeight);
-  //
-  // console.log("Gained weight", coinIdsThatGainedWeight);
-  // console.log("Lost weight", coinIdsThatLostWeight);
-
 
   // Go through each coin in our list and see if it needs to be bought
   // (if it's new here or if its weighting went up) or sold (if it's fallen out
@@ -230,6 +185,7 @@ export function analyzeRebalancingSchedule(rebalanceIntervalDays, generator) {
     // and sell to implement this rebalancing. This is relevant since we
     // usually pay fees proportional to the churn.
     // Buying and selling count equally, so use the absolute-value function
+    console.log(buyAndSellOrders);
     const churn = _.sum(
       buyAndSellOrders.map(order => Math.abs(order.weightIncrease)));
 
@@ -273,7 +229,7 @@ export function computeChurnForRebalancingStrategy(generatorFn) {
   // Try a bunch of different rebalancing frequences
   const rebalancingFrequencies = [364];
   // And try a bunch of different index sizes
-  const indexSizes = [5, 10, 20, 50, 100];
+  const indexSizes = [5];
 
   // Now go through the cross product of these (i.e. each pair of
   // frequency & index size) and compute churn for each combination.
@@ -290,15 +246,17 @@ export function computeChurnForRebalancingStrategy(generatorFn) {
     };
 
     indexSizes.forEach(indexSize => {
-      // Compute churn
-      const rebalancings = analyzeRebalancingSchedule(
+      // Get data on the rebalancing
+      const rebalancingResults = analyzeRebalancingSchedule(
         frequency,
         generatorFn(indexSize),
       );
-      const churn = _.sumBy(rebalancings, rebalancing => rebalancing.churn);
+      // This includes a list of rebalancings, each of which store their
+      // net churn
+      const churn = _.sumBy(rebalancingResults, r => r.churn);
 
       // Add it to the dict
-      churnDict[`Index: ${indexSize}`] = churn;
+      churnDict[`size${indexSize}`] = churn;
     });
 
     return churnDict;
@@ -336,8 +294,22 @@ export function writeChurnReports() {
       name: "square-root"
     },
     {
-      generatorFn: makeCappedGenerator,
-      name: "capped"
+      // The capped generators where there's a max 5% weighting.
+      // Since this is a 2-arg function, it has to be curried to become unary.
+      generatorFn: (size) => makeCappedGenerator(size, 5),
+      name: "capped-5"
+    },
+    {
+      // The capped generators where there's a max 5% weighting.
+      // Since this is a 2-arg function, it has to be curried to become unary.
+      generatorFn: (size) => makeCappedGenerator(size, 10),
+      name: "capped-10"
+    },
+    {
+      // The capped generators where there's a max 5% weighting.
+      // Since this is a 2-arg function, it has to be curried to become unary.
+      generatorFn: (size) => makeCappedGenerator(size, 20),
+      name: "capped-20"
     },
   ];
 
