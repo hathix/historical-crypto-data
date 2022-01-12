@@ -315,9 +315,14 @@ export function writeChurnReports() {
 
   // Now we can compute some churn data
   generatorFamilies.forEach(generatorFamily => {
+    console.log("Getting...");
+
     // Get churn data for this
     const churnData = computeChurnForRebalancingStrategy(
       generatorFamily.generatorFn);
+
+    console.log("Churn data for", generatorFamily.name);
+    console.log(churnData);
 
     // Write to file
     writeDictToCsv(churnData, `newresults/churn/${generatorFamily.name}.csv`);
