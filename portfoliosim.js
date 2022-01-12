@@ -311,19 +311,44 @@ export function computeChurnForRebalancingStrategy(generatorFn) {
 }
 
 /**
-  Iterates through all known index generators and reports on the (frequency,
+  Iterates through all index generator types and reports on the (frequency,
   indexSize) => churn results for each. This will be useful in analyzing
   which frequency makes the most sense for rebalancing.
   Writes the results to file.
 */
 export function writeChurnReports() {
-  // For each of our known index generators, we can make a churn report
-  INDEX_GENERATOR_FUNCTIONS.forEach(generator => {
+  // For each of our known index generator types (square root, etc.),
+  // we can compute churn stats
+  // Note that this is different than the generators themselves! These are
+  // *families* of generators, like the equal-weighted strategy. Not an
+  // individual generator like the equal-weighted-20 one.
+  const generatorFamilies = [
+    {
+      generatorFn: makeMarketCapWeightedGenerator,
+      name: "marketcap-weighted"
+    },
+    {
+      generatorFn: makeEqualWeightedGenerator,
+      name: "equal-weighted"
+    },
+    {
+      generatorFn: makeSquareRootGenerator,
+      name: "square-root"
+    },
+    {
+      generatorFn: makeCappedGenerator,
+      name: "capped"
+    },
+  ];
+
+  // Now we can compute some churn data
+  generatorFamilies.forEach(generatorFamily => {
     // Get churn data for this
-    const churnData = computeChurnForRebalancingStrategy(generator);
+    const churnData = computeChurnForRebalancingStrategy(
+      generatorFamily.generatorFn);
 
     // Write to file
-    writeDictToCsv(churnData, `newresults/churn/${generator.name}.csv`);
+    writeDictToCsv(churnData, `newresults/churn/${generatorFamily.name}.csv`);
   });
 }
 
