@@ -185,7 +185,7 @@ export function analyzeRebalancingSchedule(rebalanceIntervalDays, generator) {
     // and sell to implement this rebalancing. This is relevant since we
     // usually pay fees proportional to the churn.
     // Buying and selling count equally, so use the absolute-value function
-    console.log(buyAndSellOrders);
+    // console.log(buyAndSellOrders);
     const churn = _.sum(
       buyAndSellOrders.map(order => Math.abs(order.weightIncrease)));
 
@@ -227,9 +227,9 @@ export function analyzeRebalancingSchedule(rebalanceIntervalDays, generator) {
 */
 export function computeChurnForRebalancingStrategy(generatorFn) {
   // Try a bunch of different rebalancing frequences
-  const rebalancingFrequencies = [364];
+  const rebalancingFrequencies = [1, 7, 30, 91, 182, 364];
   // And try a bunch of different index sizes
-  const indexSizes = [5];
+  const indexSizes = [5, 10, 20, 50, 100];
 
   // Now go through the cross product of these (i.e. each pair of
   // frequency & index size) and compute churn for each combination.
