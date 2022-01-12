@@ -265,34 +265,71 @@ export function analyzeRebalancingSchedule(rebalanceIntervalDays, generator) {
 
   Given a certain generator function. Here, pass a unary function like
   `makeSquareRootGenerator` (don't invoke it! we're going to invoke it!)
+
+  Returns a dict that you can write to CSV. It compares churn for each
+  (frequency, index) pair for your given generator.
 */
-export function compareChurnByRebalancingStrategy(generatorFn) {
+export function computeChurnForRebalancingStrategy(generatorFn) {
   // Try a bunch of different rebalancing frequences
-  const rebalancingFrequencies = [1, 7, 14, 30, 91, 182, 364];
+  const rebalancingFrequencies = [364];
   // And try a bunch of different index sizes
   const indexSizes = [5, 10, 20, 50, 100];
 
-  // Now go through the cross product of each of these and compute churn
-  // for each combination
-  // The cleanest way to do this is imperatively
-  let rebalancingResults = [];
-  rebalancingFrequencies.forEach(frequency => {
+  // Now go through the cross product of these (i.e. each pair of
+  // frequency & index size) and compute churn for each combination.
+  // To analyze the data, we'll want to output it into a 2x2 CSV where
+  // there's 1 row per frequency and 1 row per index size (and the filename
+  // is the generator name). So let's construct that.
+  // To do this, we need to create one dict per frequency
+  const churnDicts = rebalancingFrequencies.map(frequency => {
+    // And inside each dict, we'll have 1 column for each index size.
+    // It's easiest to just construct this imperatively.
+    // We'll calculate churn for each and add a column for it.
+    const churnDict = {
+      frequencyDays: frequency,
+    };
+
     indexSizes.forEach(indexSize => {
-      // We now have enough informatoin to compute the rebalancing
-      // results
-      const results = analyzeRebalancingSchedule(
+      // Compute churn
+      const rebalancings = analyzeRebalancingSchedule(
         frequency,
         generatorFn(indexSize),
       );
-      // Plug these results in
-      // rebalancingResults.push(result);
+      const churn = _.sumBy(rebalancings, rebalancing => rebalancing.churn);
 
-      console.log(`f:${frequency} x i${indexSize}`, _.sumBy(results, r => r.churn));
+      // Add it to the dict
+      churnDict[`Index: ${indexSize}`] = churn;
     });
+
+    return churnDict;
   });
 
-  // Now let's go through each of the results and
+  // Now we can write this to file. But we won't do that here; we'll just
+  // return our findings.
+  // console.log(churnDict);
+  return churnDicts;
 }
+
+/**
+  Iterates through all known index generators and reports on the (frequency,
+  indexSize) => churn results for each. This will be useful in analyzing
+  which frequency makes the most sense for rebalancing.
+  Writes the results to file.
+*/
+export function writeChurnReports() {
+  // For each of our known index generators, we can make a churn report
+  INDEX_GENERATOR_FUNCTIONS.forEach(generator => {
+    // Get churn data for this
+    const churnData = computeChurnForRebalancingStrategy(generator);
+
+    // Write to file
+    writeDictToCsv(churnData, `newresults/churn/${generator.name}.csv`);
+  });
+}
+
+writeChurnReports();
+
+// compareChurnByRebalancingStrategy(makeSquareRootGenerator);
 
 // const res = analyzeRebalancingSchedule(7, makeSquareRootGenerator(20));
 // console.log("Rebalancings", res);
