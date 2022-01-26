@@ -3,8 +3,10 @@
 import { stringify } from 'csv-stringify';
 import { parse } from 'csv-parse';
 import { writeFile, createReadStream } from 'fs';
-import { writeDictToCsv } from "./lib.js";
 import _ from 'lodash';
+
+import { writeDictToCsv } from "./lib.js";
+
 
 
 // For writing files
@@ -94,7 +96,7 @@ async function getCoinList() {
 
   console.log(shortCoinList);
 
-  writeDictToCsv(shortCoinList, "fullcoinlist.csv");
+  writeDictToCsv(shortCoinList, "coinlist.csv");
 
   // Write to standard output; you can send it to a file
   // stringify(shortCoinList, {
