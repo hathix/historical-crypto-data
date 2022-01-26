@@ -15,6 +15,13 @@ import CoinGecko from 'coingecko-api';
 const CoinGeckoClient = new CoinGecko();
 
 
+/**
+  How many days do we want to get data for? This will count backwards
+  from today.
+*/
+const DAYS_TO_GO_BACK = 365;
+
+
 // Outputs the historical pricing data for a given coin to CSV.
 async function getHistoricalDataFor(coinId) {
 
@@ -24,7 +31,7 @@ async function getHistoricalDataFor(coinId) {
   // And each of these is an array of `days` items. Each item includes the
   // timestamp of that day and the corresponding value.
   let rawData = await CoinGeckoClient.coins.fetchMarketChart(coinId, {
-    days: 365, // integer or 'max'
+    days: DAYS_TO_GO_BACK, // integer or 'max'
     vs_currency: 'usd',
   });
 
@@ -80,7 +87,7 @@ const parser = parse({columns: true}, function (err, records) {
     // If you want to scrape from the in the future, set j=i.
     // If you want to start halfway through, set j = i + something
     setTimeout((i) => {
-      const j = 1900 + i;
+      const j = i;
       console.log(`Getting data for ${j}: ${records[j].name}`);
       getHistoricalDataFor(records[j].id);
     }, 2000 * i, i);

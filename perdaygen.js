@@ -1,7 +1,15 @@
+/**
+  A script that, based on the coins available in "fullcoinlist.csv" and
+  the data in "coins/", computes the prices of each coin and writes it to
+  the `perday` folder.
+*/
+
+
+
 import { dirname, getCoinList, getHistoricalData, getDataForDay, dateToTimestamp, writeDictToCsv } from "./lib.js";
 
 /**
-  Returns the market data for all 500 coins we track on the given
+  Returns the market data for all 2500 coins we track on the given
   timestamp.
   The coinList is the output of getCoinList(), which includes the names and ids
   of all coins we track.
@@ -21,8 +29,7 @@ export function getAllCoinsOnDay(coinList, timestamp) {
   return dailyData;
 }
 
-const coinList = getCoinList();
-// console.log();
+const coinList = getExtendedCoinList();
 
 // Get a list of all the timestamps we've tracked. Pull up the oldest coin
 // (Bitcoin) and extract its list of timestamps.

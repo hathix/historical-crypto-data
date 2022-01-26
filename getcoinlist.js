@@ -1,6 +1,6 @@
 /**
   A script that gets the list of all the top coins on CoinGecko right now,
-  then writes it to "coinlist.csv".
+  then writes it to "fullcoinlist.csv".
 */
 
 import { stringify } from 'csv-stringify';
@@ -99,7 +99,7 @@ async function getCoinList() {
 
   console.log(shortCoinList);
 
-  writeDictToCsv(shortCoinList, "coinlist.csv");
+  writeDictToCsv(shortCoinList, "fullcoinlist.csv");
 }
 
 getCoinList();
