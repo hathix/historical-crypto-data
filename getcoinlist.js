@@ -25,48 +25,53 @@ const CoinGeckoClient = new CoinGecko();
 // send to a CSV file.
 async function getCoinList() {
   // Get full list of coins. There are 50 per page, so grab a few.
-  console.log("Getting pages...");
+  console.log("Getting 0");
   let data0 = await CoinGeckoClient.coins.all({
     page: 1,
     per_page: 250,
   });
-  // console.log("Getting 1");
+  console.log(data0);
+  console.log("Getting 1");
   let data1 = await CoinGeckoClient.coins.all({
     page: 2,
     per_page: 250,
   });
-  // console.log("Getting 2");
+  console.log("Getting 2");
   let data2 = await CoinGeckoClient.coins.all({
     page: 3,
     per_page: 250,
   });
-  // console.log("Getting 3");
+  console.log("Getting 3");
   let data3 = await CoinGeckoClient.coins.all({
     page: 4,
     per_page: 250,
   });
-  // console.log("Getting 4");
+  console.log("Getting 4");
   let data4 = await CoinGeckoClient.coins.all({
     page: 5,
     per_page: 250,
   });
-  // console.log("Getting 5");
+  console.log("Getting 5");
   let data5 = await CoinGeckoClient.coins.all({
     page: 6,
     per_page: 250,
   });
+  console.log("Getting 6");
   let data6 = await CoinGeckoClient.coins.all({
     page: 7,
     per_page: 250,
   });
+  console.log("Getting 7");
   let data7 = await CoinGeckoClient.coins.all({
     page: 8,
     per_page: 250,
   });
+  console.log("Getting 8");
   let data8 = await CoinGeckoClient.coins.all({
     page: 9,
     per_page: 250,
   });
+  console.log("Getting 9");
   let data9 = await CoinGeckoClient.coins.all({
     page: 10,
     per_page: 250,
