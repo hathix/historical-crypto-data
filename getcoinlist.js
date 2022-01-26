@@ -1,4 +1,7 @@
-// Get a list of all the top coins
+/**
+  A script that gets the list of all the top coins on CoinGecko right now,
+  then writes it to "coinlist.csv".
+*/
 
 import { stringify } from 'csv-stringify';
 import { parse } from 'csv-parse';
@@ -22,7 +25,7 @@ const CoinGeckoClient = new CoinGecko();
 // send to a CSV file.
 async function getCoinList() {
   // Get full list of coins. There are 50 per page, so grab a few.
-  // console.log("Getting 0");
+  console.log("Getting pages...");
   let data0 = await CoinGeckoClient.coins.all({
     page: 1,
     per_page: 250,
@@ -97,13 +100,6 @@ async function getCoinList() {
   console.log(shortCoinList);
 
   writeDictToCsv(shortCoinList, "coinlist.csv");
-
-  // Write to standard output; you can send it to a file
-  // stringify(shortCoinList, {
-  //   header: true,
-  // }, (err, output) => {
-  //   console.log(output);
-  // });
 }
 
 getCoinList();
